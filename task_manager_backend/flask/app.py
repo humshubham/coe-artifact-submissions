@@ -14,6 +14,9 @@ class UserRegistration(BaseModel):
 
 @app.route("/register", methods=["POST"])
 def register():
+
+    if not request.is_json:
+        return jsonify({"error":"Request must be a valid JSON"}), 400
     
     try:
         user_data = UserRegistration.model_validate(request.json)

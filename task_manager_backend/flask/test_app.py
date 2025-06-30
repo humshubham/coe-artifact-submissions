@@ -63,3 +63,21 @@ def test_register_user_missing_fields():
         assert response.json["detail"][0]["loc"] == ["username"]
 
 
+def test_register_invalid_request():
+    
+    with app.test_client() as client:
+        invalid_json = "invalid json"
+
+        response = client.post("/register", json=invalid_json, content_type="text/plain")
+
+        assert response.status_code == 400
+        assert response.json == {"error": "Request must be a valid JSON"}
+
+
+def test_register_invalid_request_method():
+
+    with app.test_client() as client:
+
+        response = client.get("/register")
+
+        assert response.status_code == 405

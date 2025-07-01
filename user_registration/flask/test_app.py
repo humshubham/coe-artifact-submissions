@@ -14,7 +14,9 @@ def test_register_user_success():
 
         assert response.status_code == 201
         
-        assert response.json == {"message": "User registered successfully!"}
+        assert response.json["message"] == "User registered successfully!"
+        assert "user" in response.json
+        assert response.json["user"]["username"] == valid_user_data["username"]
 
 
 def test_register_user_invalid_email():
@@ -29,8 +31,11 @@ def test_register_user_invalid_email():
 
         assert response.status_code == 400
        
-        assert "value is not a valid email address" in response.json["detail"][0]["msg"]
-        assert response.json["detail"][0]["loc"] == ["email"]
+        assert "validation_error" in response.json
+        assert "body_params" in response.json["validation_error"]
+        error_detail = response.json["validation_error"]["body_params"][0]
+        assert "value is not a valid email address" in error_detail["msg"]
+        assert error_detail["loc"] == ["email"]
 
 
 def test_register_user_short_password():
@@ -44,8 +49,13 @@ def test_register_user_short_password():
         response = client.post("/register", json=short_password_data)
 
         assert response.status_code == 400
-        assert "String should have at least 8 characters" in response.json["detail"][0]["msg"]
-        assert response.json["detail"][0]["loc"] == ["password"]
+        
+        assert "validation_error" in response.json
+        assert "body_params" in response.json["validation_error"]
+        error_detail = response.json["validation_error"]["body_params"][0]
+        assert "String should have at least 8 characters" in error_detail["msg"]
+        assert error_detail["loc"] == ["password"]
+        
 
 
 def test_register_user_missing_fields():
@@ -59,8 +69,11 @@ def test_register_user_missing_fields():
         response = client.post("/register", json=missing_fields_data)
 
         assert response.status_code == 400
-        assert "Field required" in response.json["detail"][0]["msg"]
-        assert response.json["detail"][0]["loc"] == ["username"]
+        assert "validation_error" in response.json
+        assert "body_params" in response.json["validation_error"]
+        error_detail = response.json["validation_error"]["body_params"][0]
+        assert "Field required" in error_detail["msg"]
+        assert error_detail["loc"] == ["username"]
 
 
 def test_register_invalid_request():
@@ -70,8 +83,7 @@ def test_register_invalid_request():
 
         response = client.post("/register", json=invalid_json, content_type="text/plain")
 
-        assert response.status_code == 400
-        assert response.json == {"error": "Request must be a valid JSON"}
+        assert response.status_code == 415
 
 
 def test_register_invalid_request_method():

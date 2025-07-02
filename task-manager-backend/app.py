@@ -7,6 +7,7 @@ from flask_pydantic import validate
 from typing import Tuple, Optional
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import HTTPException
+from flask_jwt_extended import create_access_token, JWTManager
 
 load_dotenv()
 
@@ -17,6 +18,11 @@ class UserRequest(BaseModel):
     email: EmailStr
     username: str = Field(..., min_length=3, max_length=15)
     password: str = Field(..., min_length=8, max_length=100)
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 
 class TaskRequest(BaseModel):
@@ -77,7 +83,9 @@ def create_app(database_uri_override: Optional[str] = None) -> Flask:
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'super-secret')  # Change this in production!
     
+    jwt = JWTManager(app)
     db.init_app(app)
 
     @app.route('/register', methods=['POST'])
@@ -94,6 +102,15 @@ def create_app(database_uri_override: Optional[str] = None) -> Flask:
         db.session.commit()
         
         return jsonify(new_user.to_json()), 201
+
+    @app.route('/login', methods=['POST'])
+    @validate()
+    def login(body: LoginRequest):
+        user = User.query.filter_by(username=body.username).first()
+        if user and user.check_password(body.password):
+            access_token = create_access_token(identity=user.id)
+            return jsonify(access_token=access_token)
+        return jsonify({'message': 'Invalid credentials'}), 401
 
     @app.route('/tasks', methods=['POST'])
     @validate()

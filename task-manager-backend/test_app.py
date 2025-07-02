@@ -476,4 +476,58 @@ def test_delete_task_invalid_id(client):
     response = client.delete('/tasks/abc')
     assert response.status_code == 404
     data = json.loads(response.data)
-    assert data['message'] == 'Resource not found'
+    assert data['message'] == "Resource not found"
+
+
+def test_login_user_success(client, user):
+    """Test user login with correct credentials."""
+    login_data = {
+        'username': 'testuser',
+        'password': 'password123'
+    }
+    response = client.post('/login', json=login_data)
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert 'access_token' in data
+
+
+def test_login_wrong_password(client, user):
+    """Test login with wrong password."""
+    login_data = {
+        'username': 'testuser',
+        'password': 'wrongpassword'
+    }
+    response = client.post('/login', json=login_data)
+    assert response.status_code == 401
+    data = json.loads(response.data)
+    assert data['message'] == 'Invalid credentials'
+
+
+def test_login_nonexistent_user(client):
+    """Test login with a username that does not exist."""
+    login_data = {
+        'username': 'nonexistentuser',
+        'password': 'password123'
+    }
+    response = client.post('/login', json=login_data)
+    assert response.status_code == 401
+    data = json.loads(response.data)
+    assert data['message'] == 'Invalid credentials'
+
+
+def test_login_missing_username(client):
+    """Test login with missing username."""
+    login_data = {'password': 'password123'}
+    response = client.post('/login', json=login_data)
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+
+
+def test_login_missing_password(client):
+    """Test login with missing password."""
+    login_data = {'username': 'testuser'}
+    response = client.post('/login', json=login_data)
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data

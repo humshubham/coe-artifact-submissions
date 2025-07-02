@@ -1,6 +1,6 @@
 import pytest
 import json
-from app import create_app, db, Task
+from app import create_app, db, Task, User
 
 
 @pytest.fixture
@@ -19,40 +19,245 @@ def client(app_with_context):
 
 
 @pytest.fixture
-def seeded_task(app_with_context):
-    task = Task(title='Initial Task', description='Initial Description')
+def user(client):
+    """Register a new user and return the user's data."""
+    user_data = {
+        'email': 'test@example.com',
+        'username': 'testuser',
+        'password': 'password123'
+    }
+    client.post('/register', json=user_data)
+    # The user is created, now we can fetch it to get the ID
+    with db.session.no_autoflush:
+        db_user = User.query.filter_by(username=user_data['username']).first()
+        return db_user
+
+
+@pytest.fixture
+def seeded_task(app_with_context, user):
+    task = Task(title='Initial Task', description='Initial Description', user_id=user.id)
     db.session.add(task)
     db.session.commit()
     return task
 
 
-def test_create_task_success(client):
-    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description'})
+def test_register_user_success(client):
+    user_data = {
+        'email': 'newuser@example.com',
+        'username': 'newuser',
+        'password': 'password123'
+    }
+    response = client.post('/register', json=user_data)
+    assert response.status_code == 201
+    data = json.loads(response.data)
+    assert data['username'] == user_data['username']
+    assert data['email'] == user_data['email']
+    assert 'id' in data
+
+
+def test_register_user_invalid_email(client):
+    response = client.post('/register', json={
+        'email': 'not-an-email',
+        'username': 'newuser',
+        'password': 'password123'
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert "value is not a valid email address" in error_detail["msg"]
+    assert error_detail["loc"] == ["email"]
+
+
+def test_register_user_short_username(client):
+    response = client.post('/register', json={
+        'email': 'newuser@example.com',
+        'username': 'nu',
+        'password': 'password123'
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert "String should have at least 3 characters" in error_detail["msg"]
+    assert error_detail["loc"] == ["username"]
+
+
+def test_register_user_long_username(client):
+    response = client.post('/register', json={
+        'email': 'newuser@example.com',
+        'username': 'a' * 16,
+        'password': 'password123'
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert "String should have at most 15 characters" in error_detail["msg"]
+    assert error_detail["loc"] == ["username"]
+
+
+def test_register_user_short_password(client):
+    response = client.post('/register', json={
+        'email': 'newuser@example.com',
+        'username': 'newuser',
+        'password': 'a' * 7
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert "String should have at least 8 characters" in error_detail["msg"]
+    assert error_detail["loc"] == ["password"]
+
+
+def test_register_user_long_password(client):
+    response = client.post('/register', json={
+        'email': 'newuser@example.com',
+        'username': 'newuser',
+        'password': 'a' * 101
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert "String should have at most 100 characters" in error_detail["msg"]
+    assert error_detail["loc"] == ["password"]
+
+
+def test_register_user_missing_username(client):
+    response = client.post('/register', json={
+        'email': 'newuser@example.com',
+        'password': 'password123'
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert "Field required" in error_detail["msg"]
+    assert error_detail["loc"] == ["username"]
+
+
+def test_register_user_missing_email(client):
+    response = client.post('/register', json={
+        'username': 'newuser',
+        'password': 'password123'
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert "Field required" in error_detail["msg"]
+    assert error_detail["loc"] == ["email"]
+
+
+def test_register_user_missing_password(client):
+    response = client.post('/register', json={
+        'email': 'newuser@example.com',
+        'username': 'newuser'
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert "Field required" in error_detail["msg"]
+    assert error_detail["loc"] == ["password"]
+
+
+def test_register_user_username_not_string(client):
+    response = client.post('/register', json={
+        'username': 123,
+        'email': 'test@example.com',
+        'password': 'password123'
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert "Input should be a valid string" in error_detail["msg"]
+    assert error_detail["loc"] == ["username"]
+
+
+def test_register_user_email_not_string(client):
+    response = client.post('/register', json={
+        'username': 'testuser',
+        'email': 123,
+        'password': 'password123'
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert "Input should be a valid string" in error_detail["msg"]
+    assert error_detail["loc"] == ["email"]
+
+
+def test_register_user_password_not_string(client):
+    response = client.post('/register', json={
+        'username': 'testuser',
+        'email': 'test@example.com',
+        'password': 12345678
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert "Input should be a valid string" in error_detail["msg"]
+    assert error_detail["loc"] == ["password"]
+
+
+def test_register_user_duplicate_username(client, user):
+    response = client.post('/register', json={
+        'email': 'another@example.com',
+        'username': 'testuser',
+        'password': 'password123'
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert data['message'] == 'Username already exists'
+
+
+def test_register_user_duplicate_email(client, user):
+    response = client.post('/register', json={
+        'email': 'test@example.com',
+        'username': 'anotheruser',
+        'password': 'password123'
+    })
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert data['message'] == 'Email already registered'
+
+
+def test_create_task_success(client, user):
+    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description', 'user_id': user.id})
     assert response.status_code == 201
     data = json.loads(response.data)
     assert data['title'] == 'Test Task'
     assert data['description'] == 'Test Description'
     assert 'id' in data
+    assert data['user_id'] == user.id
 
 
-def test_create_task_no_title(client):
-    response = client.post('/tasks', json={'description': 'This should fail'})
+def test_create_task_no_title(client, user):
+    response = client.post('/tasks', json={'description': 'This should fail', 'user_id': user.id})
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
-    assert 'title' in data['validation_error']['body_params'][0]['loc']
+    error_detail = data['validation_error']['body_params'][0]
+    assert error_detail['loc'] == ['title']
+    assert "Field required" in error_detail['msg']
 
 
-def test_create_task_only_title(client):
-    response = client.post('/tasks', json={'title': 'Task with title only'})
+def test_create_task_only_title(client, user):
+    response = client.post('/tasks', json={'title': 'Task with title only', 'user_id': user.id})
     assert response.status_code == 201
     data = json.loads(response.data)
     assert data['title'] == 'Task with title only'
     assert data['description'] == ''
 
 
-def test_create_task_empty_title(client):
-    response = client.post('/tasks', json={'title': '', 'description': 'd'})
+def test_create_task_empty_title(client, user):
+    response = client.post('/tasks', json={'title': '', 'description': 'd', 'user_id': user.id})
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
@@ -60,8 +265,8 @@ def test_create_task_empty_title(client):
     assert 'at least 1 character' in data['validation_error']['body_params'][0]['msg']
 
 
-def test_create_task_wrong_type(client):
-    response = client.post('/tasks', json={'title': 123, 'description': 'd'})
+def test_create_task_wrong_type(client, user):
+    response = client.post('/tasks', json={'title': 123, 'description': 'd', 'user_id': user.id})
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
@@ -74,46 +279,70 @@ def test_create_task_empty_json(client):
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
-    assert data['validation_error']['body_params'][0]['loc'] == ['title']
-    assert 'Field required' in data['validation_error']['body_params'][0]['msg']
+    errors = {tuple(e['loc']): e['msg'] for e in data['validation_error']['body_params']}
+    assert ('title',) in errors
+    assert "Field required" in errors[('title',)]
+    assert ('user_id',) in errors
+    assert "Field required" in errors[('user_id',)]
 
 
-def test_create_task_title_max_length(client):
+def test_create_task_no_user_id(client):
+    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description'})
+    assert response.status_code == 400
+    data = json.loads(response.data)
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert error_detail['loc'] == ['user_id']
+    assert "Field required" in error_detail['msg']
+
+
+def test_create_task_nonexistent_user(client):
+    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description', 'user_id': 999})
+    assert response.status_code == 404
+    data = json.loads(response.data)
+    assert data['message'] == "Resource not found"
+
+
+def test_create_task_title_max_length(client, user):
     title = 'a' * 50
-    response = client.post('/tasks', json={'title': title, 'description': 'd'})
+    response = client.post('/tasks', json={'title': title, 'description': 'd', 'user_id': user.id})
     assert response.status_code == 201
     data = json.loads(response.data)
     assert data['title'] == title
 
 
-def test_create_task_title_too_long(client):
+def test_create_task_title_too_long(client, user):
     title = 'a' * 51
-    response = client.post('/tasks', json={'title': title, 'description': 'd'})
+    response = client.post('/tasks', json={'title': title, 'description': 'd', 'user_id': user.id})
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
-    assert 'String should have at most 50 characters' in data['validation_error']['body_params'][0]['msg']
+    error_detail = data['validation_error']['body_params'][0]
+    assert 'String should have at most 50 characters' in error_detail['msg']
+    assert error_detail['loc'] == ['title']
 
 
-def test_create_task_description_max_length(client):
+def test_create_task_description_max_length(client, user):
     description = 'a' * 200
-    response = client.post('/tasks', json={'title': 'Test', 'description': description})
+    response = client.post('/tasks', json={'title': 'Test', 'description': description, 'user_id': user.id})
     assert response.status_code == 201
     data = json.loads(response.data)
     assert data['description'] == description
 
 
-def test_create_task_description_too_long(client):
+def test_create_task_description_too_long(client, user):
     description = 'a' * 201
-    response = client.post('/tasks', json={'title': 'Test', 'description': description})
+    response = client.post('/tasks', json={'title': 'Test', 'description': description, 'user_id': user.id})
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
-    assert 'String should have at most 200 characters' in data['validation_error']['body_params'][0]['msg']
+    error_detail = data['validation_error']['body_params'][0]
+    assert 'String should have at most 200 characters' in error_detail['msg']
+    assert error_detail['loc'] == ['description']
 
 
-def test_create_task_extra_fields(client):
-    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description', 'extra': 'field'})
+def test_create_task_extra_fields(client, user):
+    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description', 'extra': 'field', 'user_id': user.id})
     assert response.status_code == 201
     data = json.loads(response.data)
     assert 'extra' not in data
@@ -126,12 +355,13 @@ def test_get_tasks_empty(client):
     assert len(data['tasks']) == 0
 
 
-def test_get_tasks_success(client, seeded_task):
+def test_get_tasks_success(client, seeded_task, user):
     response = client.get('/tasks')
     assert response.status_code == 200
     data = json.loads(response.data)
     assert len(data['tasks']) == 1
     assert data['tasks'][0]['title'] == seeded_task.title
+    assert data['tasks'][0]['user_id'] == user.id
 
 
 def test_get_task_success(client, seeded_task):
@@ -155,8 +385,8 @@ def test_get_task_invalid_id(client):
     assert data['message'] == 'Resource not found'
 
 
-def test_update_task_success(client, seeded_task):
-    response = client.put(f'/tasks/{seeded_task.id}', json={'title': 'New Title', 'description': 'New Description'})
+def test_update_task_success(client, seeded_task, user):
+    response = client.put(f'/tasks/{seeded_task.id}', json={'title': 'New Title', 'description': 'New Description', 'user_id': user.id})
     assert response.status_code == 200
     data = json.loads(response.data)
     assert data['title'] == 'New Title'
@@ -169,53 +399,61 @@ def test_update_task_success(client, seeded_task):
     assert data['description'] == 'New Description'
 
 
-def test_update_task_only_title(client, seeded_task):
-    response = client.put(f'/tasks/{seeded_task.id}', json={'title': 'Only Title Updated'})
+def test_update_task_only_title(client, seeded_task, user):
+    response = client.put(f'/tasks/{seeded_task.id}', json={'title': 'Only Title Updated', 'user_id': user.id})
     assert response.status_code == 200
     data = json.loads(response.data)
     assert data['title'] == 'Only Title Updated'
     assert data['description'] == ''
 
 
-def test_update_task_not_found(client):
-    response = client.put('/tasks/999', json={'title': 'New Title', 'description': ''})
+def test_update_task_not_found(client, user):
+    response = client.put('/tasks/999', json={'title': 'New Title', 'description': '', 'user_id': user.id})
     assert response.status_code == 404
     data = json.loads(response.data)
     assert data['message'] == 'Resource not found'
 
 
-def test_update_task_no_title(client, seeded_task):
-    response = client.put(f'/tasks/{seeded_task.id}', json={'description': 'This should fail'})
+def test_update_task_no_title(client, seeded_task, user):
+    response = client.put(f'/tasks/{seeded_task.id}', json={'description': 'This should fail', 'user_id': user.id})
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    assert error_detail['loc'] == ['title']
+    assert "Field required" in error_detail['msg']
 
 
-def test_update_task_empty_title(client, seeded_task):
-    response = client.put(f'/tasks/{seeded_task.id}', json={'title': ''})
+def test_update_task_empty_title(client, seeded_task, user):
+    response = client.put(f'/tasks/{seeded_task.id}', json={'title': '', 'user_id': user.id})
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
-    assert data['validation_error']['body_params'][0]['loc'] == ['title']
-    assert 'at least 1 character' in data['validation_error']['body_params'][0]['msg']
+    error_detail = data['validation_error']['body_params'][0]
+    assert error_detail['loc'] == ['title']
+    assert "at least 1 character" in error_detail['msg']
 
 
-def test_update_task_title_too_long(client, seeded_task):
+def test_update_task_title_too_long(client, seeded_task, user):
     title = 'a' * 51
-    response = client.put(f'/tasks/{seeded_task.id}', json={'title': title})
+    response = client.put(f'/tasks/{seeded_task.id}', json={'title': title, 'user_id': user.id})
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
-    assert 'String should have at most 50 characters' in data['validation_error']['body_params'][0]['msg']
+    error_detail = data['validation_error']['body_params'][0]
+    assert 'String should have at most 50 characters' in error_detail['msg']
+    assert error_detail['loc'] == ['title']
 
 
-def test_update_task_description_too_long(client, seeded_task):
+def test_update_task_description_too_long(client, seeded_task, user):
     description = 'a' * 201
-    response = client.put(f'/tasks/{seeded_task.id}', json={'title': 't', 'description': description})
+    response = client.put(f'/tasks/{seeded_task.id}', json={'title': 't', 'description': description, 'user_id': user.id})
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
-    assert 'String should have at most 200 characters' in data['validation_error']['body_params'][0]['msg']
+    error_detail = data['validation_error']['body_params'][0]
+    assert 'String should have at most 200 characters' in error_detail['msg']
+    assert error_detail['loc'] == ['description']
 
 
 def test_delete_task_success(client, seeded_task):

@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from flask_pydantic import validate
 
 load_dotenv()
@@ -11,8 +11,8 @@ db = SQLAlchemy()
 
 
 class TaskRequest(BaseModel):
-    title: str
-    description: str = ''
+    title: str = Field(..., min_length=1, max_length=50)
+    description: str = Field('', max_length=200)
 
 
 class Task(db.Model):
@@ -79,6 +79,10 @@ def create_app(database_uri_override=None):
         db.session.delete(task)
         db.session.commit()
         return jsonify({'message': 'Task deleted!'})
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({'message': 'Resource not found'}), 404
 
     return app
 

@@ -41,6 +41,17 @@ def seeded_task(app_with_context, user):
     return task
 
 
+@pytest.fixture
+def auth_header(client, user):
+    login_data = {
+        'username': user.username,
+        'password': 'password123'
+    }
+    response = client.post('/login', json=login_data)
+    token = response.get_json()['access_token']
+    return {'Authorization': f'Bearer {token}'}
+
+
 def test_register_user_success(client):
     user_data = {
         'email': 'newuser@example.com',
@@ -228,8 +239,8 @@ def test_register_user_duplicate_email(client, user):
     assert data['message'] == 'Email already registered'
 
 
-def test_create_task_success(client, user):
-    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description', 'user_id': user.id})
+def test_create_task_success(client, user, auth_header):
+    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description'}, headers=auth_header)
     assert response.status_code == 201
     data = json.loads(response.data)
     assert data['title'] == 'Test Task'
@@ -238,8 +249,8 @@ def test_create_task_success(client, user):
     assert data['user_id'] == user.id
 
 
-def test_create_task_no_title(client, user):
-    response = client.post('/tasks', json={'description': 'This should fail', 'user_id': user.id})
+def test_create_task_no_title(client, auth_header):
+    response = client.post('/tasks', json={'description': 'This should fail'}, headers=auth_header)
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
@@ -248,16 +259,16 @@ def test_create_task_no_title(client, user):
     assert "Field required" in error_detail['msg']
 
 
-def test_create_task_only_title(client, user):
-    response = client.post('/tasks', json={'title': 'Task with title only', 'user_id': user.id})
+def test_create_task_only_title(client, auth_header):
+    response = client.post('/tasks', json={'title': 'Task with title only'}, headers=auth_header)
     assert response.status_code == 201
     data = json.loads(response.data)
     assert data['title'] == 'Task with title only'
     assert data['description'] == ''
 
 
-def test_create_task_empty_title(client, user):
-    response = client.post('/tasks', json={'title': '', 'description': 'd', 'user_id': user.id})
+def test_create_task_empty_title(client, auth_header):
+    response = client.post('/tasks', json={'title': '', 'description': 'd'}, headers=auth_header)
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
@@ -265,8 +276,8 @@ def test_create_task_empty_title(client, user):
     assert 'at least 1 character' in data['validation_error']['body_params'][0]['msg']
 
 
-def test_create_task_wrong_type(client, user):
-    response = client.post('/tasks', json={'title': 123, 'description': 'd', 'user_id': user.id})
+def test_create_task_wrong_type(client, auth_header):
+    response = client.post('/tasks', json={'title': 123, 'description': 'd'}, headers=auth_header)
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
@@ -274,46 +285,35 @@ def test_create_task_wrong_type(client, user):
     assert 'Input should be a valid string' in data['validation_error']['body_params'][0]['msg']
 
 
-def test_create_task_empty_json(client):
-    response = client.post('/tasks', json={})
+def test_create_task_empty_json(client, auth_header):
+    response = client.post('/tasks', json={}, headers=auth_header)
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
     errors = {tuple(e['loc']): e['msg'] for e in data['validation_error']['body_params']}
     assert ('title',) in errors
     assert "Field required" in errors[('title',)]
-    assert ('user_id',) in errors
-    assert "Field required" in errors[('user_id',)]
 
 
-def test_create_task_no_user_id(client):
-    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description'})
-    assert response.status_code == 400
+def test_create_task_no_user_id(client, auth_header):
+    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description'}, headers=auth_header)
+    assert response.status_code == 201
     data = json.loads(response.data)
-    assert 'validation_error' in data
-    error_detail = data['validation_error']['body_params'][0]
-    assert error_detail['loc'] == ['user_id']
-    assert "Field required" in error_detail['msg']
+    assert data['title'] == 'Test Task'
+    assert data['description'] == 'Test Description'
 
 
-def test_create_task_nonexistent_user(client):
-    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description', 'user_id': 999})
-    assert response.status_code == 404
-    data = json.loads(response.data)
-    assert data['message'] == "Resource not found"
-
-
-def test_create_task_title_max_length(client, user):
+def test_create_task_title_max_length(client, auth_header):
     title = 'a' * 50
-    response = client.post('/tasks', json={'title': title, 'description': 'd', 'user_id': user.id})
+    response = client.post('/tasks', json={'title': title, 'description': 'd'}, headers=auth_header)
     assert response.status_code == 201
     data = json.loads(response.data)
     assert data['title'] == title
 
 
-def test_create_task_title_too_long(client, user):
+def test_create_task_title_too_long(client, auth_header):
     title = 'a' * 51
-    response = client.post('/tasks', json={'title': title, 'description': 'd', 'user_id': user.id})
+    response = client.post('/tasks', json={'title': title, 'description': 'd'}, headers=auth_header)
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
@@ -322,17 +322,17 @@ def test_create_task_title_too_long(client, user):
     assert error_detail['loc'] == ['title']
 
 
-def test_create_task_description_max_length(client, user):
+def test_create_task_description_max_length(client, auth_header):
     description = 'a' * 200
-    response = client.post('/tasks', json={'title': 'Test', 'description': description, 'user_id': user.id})
+    response = client.post('/tasks', json={'title': 'Test', 'description': description}, headers=auth_header)
     assert response.status_code == 201
     data = json.loads(response.data)
     assert data['description'] == description
 
 
-def test_create_task_description_too_long(client, user):
+def test_create_task_description_too_long(client, auth_header):
     description = 'a' * 201
-    response = client.post('/tasks', json={'title': 'Test', 'description': description, 'user_id': user.id})
+    response = client.post('/tasks', json={'title': 'Test', 'description': description}, headers=auth_header)
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
@@ -341,22 +341,22 @@ def test_create_task_description_too_long(client, user):
     assert error_detail['loc'] == ['description']
 
 
-def test_create_task_extra_fields(client, user):
-    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description', 'extra': 'field', 'user_id': user.id})
+def test_create_task_extra_fields(client, auth_header):
+    response = client.post('/tasks', json={'title': 'Test Task', 'description': 'Test Description', 'extra': 'field'}, headers=auth_header)
     assert response.status_code == 201
     data = json.loads(response.data)
     assert 'extra' not in data
 
 
-def test_get_tasks_empty(client):
-    response = client.get('/tasks')
+def test_get_tasks_empty(client, auth_header):
+    response = client.get('/tasks', headers=auth_header)
     assert response.status_code == 200
     data = json.loads(response.data)
     assert len(data['tasks']) == 0
 
 
-def test_get_tasks_success(client, seeded_task, user):
-    response = client.get('/tasks')
+def test_get_tasks_success(client, seeded_task, user, auth_header):
+    response = client.get('/tasks', headers=auth_header)
     assert response.status_code == 200
     data = json.loads(response.data)
     assert len(data['tasks']) == 1
@@ -364,58 +364,58 @@ def test_get_tasks_success(client, seeded_task, user):
     assert data['tasks'][0]['user_id'] == user.id
 
 
-def test_get_task_success(client, seeded_task):
-    response = client.get(f'/tasks/{seeded_task.id}')
+def test_get_task_success(client, seeded_task, auth_header):
+    response = client.get(f'/tasks/{seeded_task.id}', headers=auth_header)
     assert response.status_code == 200
     data = json.loads(response.data)
     assert data['title'] == seeded_task.title
 
 
-def test_get_task_not_found(client):
-    response = client.get('/tasks/999')
+def test_get_task_not_found(client, auth_header):
+    response = client.get('/tasks/999', headers=auth_header)
     assert response.status_code == 404
     data = json.loads(response.data)
     assert data['message'] == 'Resource not found'
 
 
-def test_get_task_invalid_id(client):
-    response = client.get('/tasks/abc')
+def test_get_task_invalid_id(client, auth_header):
+    response = client.get('/tasks/abc', headers=auth_header)
     assert response.status_code == 404
     data = json.loads(response.data)
     assert data['message'] == 'Resource not found'
 
 
-def test_update_task_success(client, seeded_task, user):
-    response = client.put(f'/tasks/{seeded_task.id}', json={'title': 'New Title', 'description': 'New Description', 'user_id': user.id})
+def test_update_task_success(client, seeded_task, auth_header):
+    response = client.put(f'/tasks/{seeded_task.id}', json={'title': 'New Title', 'description': 'New Description'}, headers=auth_header)
     assert response.status_code == 200
     data = json.loads(response.data)
     assert data['title'] == 'New Title'
     assert data['description'] == 'New Description'
     assert data['id'] == seeded_task.id
 
-    get_response = client.get(f'/tasks/{seeded_task.id}')
+    get_response = client.get(f'/tasks/{seeded_task.id}', headers=auth_header)
     data = json.loads(get_response.data)
     assert data['title'] == 'New Title'
     assert data['description'] == 'New Description'
 
 
-def test_update_task_only_title(client, seeded_task, user):
-    response = client.put(f'/tasks/{seeded_task.id}', json={'title': 'Only Title Updated', 'user_id': user.id})
+def test_update_task_only_title(client, seeded_task, auth_header):
+    response = client.put(f'/tasks/{seeded_task.id}', json={'title': 'Only Title Updated'}, headers=auth_header)
     assert response.status_code == 200
     data = json.loads(response.data)
     assert data['title'] == 'Only Title Updated'
     assert data['description'] == ''
 
 
-def test_update_task_not_found(client, user):
-    response = client.put('/tasks/999', json={'title': 'New Title', 'description': '', 'user_id': user.id})
+def test_update_task_not_found(client, auth_header):
+    response = client.put('/tasks/999', json={'title': 'New Title', 'description': ''}, headers=auth_header)
     assert response.status_code == 404
     data = json.loads(response.data)
     assert data['message'] == 'Resource not found'
 
 
-def test_update_task_no_title(client, seeded_task, user):
-    response = client.put(f'/tasks/{seeded_task.id}', json={'description': 'This should fail', 'user_id': user.id})
+def test_update_task_no_title(client, seeded_task, auth_header):
+    response = client.put(f'/tasks/{seeded_task.id}', json={'description': 'This should fail'}, headers=auth_header)
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
@@ -424,8 +424,8 @@ def test_update_task_no_title(client, seeded_task, user):
     assert "Field required" in error_detail['msg']
 
 
-def test_update_task_empty_title(client, seeded_task, user):
-    response = client.put(f'/tasks/{seeded_task.id}', json={'title': '', 'user_id': user.id})
+def test_update_task_empty_title(client, seeded_task, auth_header):
+    response = client.put(f'/tasks/{seeded_task.id}', json={'title': ''}, headers=auth_header)
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
@@ -434,9 +434,9 @@ def test_update_task_empty_title(client, seeded_task, user):
     assert "at least 1 character" in error_detail['msg']
 
 
-def test_update_task_title_too_long(client, seeded_task, user):
+def test_update_task_title_too_long(client, seeded_task, auth_header):
     title = 'a' * 51
-    response = client.put(f'/tasks/{seeded_task.id}', json={'title': title, 'user_id': user.id})
+    response = client.put(f'/tasks/{seeded_task.id}', json={'title': title}, headers=auth_header)
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
@@ -445,9 +445,9 @@ def test_update_task_title_too_long(client, seeded_task, user):
     assert error_detail['loc'] == ['title']
 
 
-def test_update_task_description_too_long(client, seeded_task, user):
+def test_update_task_description_too_long(client, seeded_task, auth_header):
     description = 'a' * 201
-    response = client.put(f'/tasks/{seeded_task.id}', json={'title': 't', 'description': description, 'user_id': user.id})
+    response = client.put(f'/tasks/{seeded_task.id}', json={'title': 't', 'description': description}, headers=auth_header)
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
@@ -456,24 +456,24 @@ def test_update_task_description_too_long(client, seeded_task, user):
     assert error_detail['loc'] == ['description']
 
 
-def test_delete_task_success(client, seeded_task):
-    response = client.delete(f'/tasks/{seeded_task.id}')
+def test_delete_task_success(client, seeded_task, auth_header):
+    response = client.delete(f'/tasks/{seeded_task.id}', headers=auth_header)
     assert response.status_code == 200
     assert b'Task deleted!' in response.data
 
-    get_response = client.get(f'/tasks/{seeded_task.id}')
+    get_response = client.get(f'/tasks/{seeded_task.id}', headers=auth_header)
     assert get_response.status_code == 404
 
 
-def test_delete_task_not_found(client):
-    response = client.delete('/tasks/999')
+def test_delete_task_not_found(client, auth_header):
+    response = client.delete('/tasks/999', headers=auth_header)
     assert response.status_code == 404
     data = json.loads(response.data)
     assert data['message'] == 'Resource not found'
 
 
-def test_delete_task_invalid_id(client):
-    response = client.delete('/tasks/abc')
+def test_delete_task_invalid_id(client, auth_header):
+    response = client.delete('/tasks/abc', headers=auth_header)
     assert response.status_code == 404
     data = json.loads(response.data)
     assert data['message'] == "Resource not found"
@@ -491,7 +491,7 @@ def test_login_user_success(client, user):
     assert 'access_token' in data
 
 
-def test_login_wrong_password(client, user):
+def test_login_wrong_password(client):
     """Test login with wrong password."""
     login_data = {
         'username': 'testuser',

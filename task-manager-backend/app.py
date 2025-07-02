@@ -7,7 +7,7 @@ from flask_pydantic import validate
 from typing import Tuple, Optional
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import HTTPException
-from flask_jwt_extended import create_access_token, JWTManager
+from flask_jwt_extended import create_access_token, JWTManager, jwt_required, get_jwt_identity
 
 load_dotenv()
 
@@ -28,7 +28,6 @@ class LoginRequest(BaseModel):
 class TaskRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=50)
     description: str = Field('', max_length=200)
-    user_id: int
 
 
 class User(db.Model):
@@ -48,7 +47,7 @@ class User(db.Model):
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
 
-    def to_json(self):
+    def to_json(self) -> dict:
         return {
             'id': self.id,
             'username': self.username,
@@ -67,7 +66,7 @@ class Task(db.Model):
         self.description = description
         self.user_id = user_id
 
-    def to_json(self):
+    def to_json(self) -> dict:
         return {
             'id': self.id,
             'title': self.title,
@@ -83,7 +82,7 @@ def create_app(database_uri_override: Optional[str] = None) -> Flask:
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'super-secret')  # Change this in production!
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY') 
     
     jwt = JWTManager(app)
     db.init_app(app)
@@ -108,39 +107,47 @@ def create_app(database_uri_override: Optional[str] = None) -> Flask:
     def login(body: LoginRequest):
         user = User.query.filter_by(username=body.username).first()
         if user and user.check_password(body.password):
-            access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=str(user.id))
             return jsonify(access_token=access_token)
         return jsonify({'message': 'Invalid credentials'}), 401
 
     @app.route('/tasks', methods=['POST'])
+    @jwt_required()
     @validate()
     def create_task(body: TaskRequest) -> Tuple[Response, int]:
-        user = db.session.get(User, body.user_id)
+        current_user_id = int(get_jwt_identity())
+        user = db.session.get(User, current_user_id)
         if user is None:
             abort(404, description="User not found")
-        new_task = Task(title=body.title, description=body.description, user_id=body.user_id)
+        new_task = Task(title=body.title, description=body.description, user_id=current_user_id)
         db.session.add(new_task)
         db.session.commit()
         return jsonify(new_task.to_json()), 201
 
     @app.route('/tasks', methods=['GET'])
+    @jwt_required()
     def get_tasks() -> Response:
-        tasks = Task.query.all()
+        current_user_id = int(get_jwt_identity())
+        tasks = Task.query.filter_by(user_id=current_user_id).all()
         tasks_list = [task.to_json() for task in tasks]
         return jsonify({'tasks': tasks_list})
 
     @app.route('/tasks/<task_id>', methods=['GET'])
+    @jwt_required()
     def get_task(task_id: int) -> Response:
+        current_user_id = int(get_jwt_identity())
         task = db.session.get(Task, task_id)
-        if task is None:
+        if task is None or task.user_id != current_user_id:
             abort(404)
         return jsonify(task.to_json())
 
     @app.route('/tasks/<task_id>', methods=['PUT'])
+    @jwt_required()
     @validate()
     def update_task(task_id: int, body: TaskRequest) -> Response:
+        current_user_id = int(get_jwt_identity())
         task = db.session.get(Task, task_id)
-        if task is None:
+        if task is None or task.user_id != current_user_id:
             abort(404)
         task.title = body.title
         task.description = body.description if body.description is not None else task.description
@@ -148,9 +155,11 @@ def create_app(database_uri_override: Optional[str] = None) -> Flask:
         return jsonify(task.to_json())
 
     @app.route('/tasks/<task_id>', methods=['DELETE'])
+    @jwt_required()
     def delete_task(task_id: int) -> Response:
+        current_user_id = int(get_jwt_identity())
         task = db.session.get(Task, task_id)
-        if task is None:
+        if task is None or task.user_id != current_user_id:
             abort(404)
         db.session.delete(task)
         db.session.commit()

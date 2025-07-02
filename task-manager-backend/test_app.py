@@ -1,5 +1,7 @@
 import pytest
 import json
+from datetime import timedelta
+import time
 from app import create_app, db, Task, User
 
 
@@ -20,7 +22,6 @@ def client(app_with_context):
 
 @pytest.fixture
 def user(client):
-    """Register a new user and return the user's data."""
     user_data = {
         'email': 'test@example.com',
         'username': 'testuser',
@@ -480,7 +481,6 @@ def test_delete_task_invalid_id(client, auth_header):
 
 
 def test_login_user_success(client, user):
-    """Test user login with correct credentials."""
     login_data = {
         'username': 'testuser',
         'password': 'password123'
@@ -492,7 +492,6 @@ def test_login_user_success(client, user):
 
 
 def test_login_wrong_password(client):
-    """Test login with wrong password."""
     login_data = {
         'username': 'testuser',
         'password': 'wrongpassword'
@@ -504,7 +503,6 @@ def test_login_wrong_password(client):
 
 
 def test_login_nonexistent_user(client):
-    """Test login with a username that does not exist."""
     login_data = {
         'username': 'nonexistentuser',
         'password': 'password123'
@@ -516,7 +514,6 @@ def test_login_nonexistent_user(client):
 
 
 def test_login_missing_username(client):
-    """Test login with missing username."""
     login_data = {'password': 'password123'}
     response = client.post('/login', json=login_data)
     assert response.status_code == 400
@@ -525,9 +522,109 @@ def test_login_missing_username(client):
 
 
 def test_login_missing_password(client):
-    """Test login with missing password."""
     login_data = {'username': 'testuser'}
     response = client.post('/login', json=login_data)
     assert response.status_code == 400
     data = json.loads(response.data)
     assert 'validation_error' in data
+
+
+def test_user_set_and_check_password():
+    user = User(username='foo', email='foo@example.com')
+    user.set_password('supersecret')
+    assert user.check_password('supersecret')
+    assert not user.check_password('wrongpass')
+
+
+def test_user_to_json():
+    user = User(username='bar', email='bar@example.com')
+    user.id = 42
+    result = user.to_json()
+    assert result['id'] == 42
+    assert result['username'] == 'bar'
+    assert result['email'] == 'bar@example.com'
+
+
+def test_task_to_json(user):
+    task = Task(title='T', description='D', user_id=user.id)
+    task.id = 99
+    result = task.to_json()
+    assert result['id'] == 99
+    assert result['title'] == 'T'
+    assert result['description'] == 'D'
+    assert result['user_id'] == user.id
+
+
+def test_protected_route_no_token(client):
+    resp = client.get('/tasks')
+    assert resp.status_code == 401
+    assert b'Missing Authorization Header' in resp.data or b'missing' in resp.data.lower()
+
+
+def test_protected_route_invalid_token(client):
+    headers = {'Authorization': 'Bearer invalidtoken'}
+    resp = client.get('/tasks', headers=headers)
+    assert resp.status_code == 422 or resp.status_code == 401
+
+
+def test_protected_route_expired_token(client, user):
+    # Create a token with a very short expiry
+    from flask_jwt_extended import create_access_token
+    token = create_access_token(identity=str(user.id), expires_delta=timedelta(seconds=1))
+    time.sleep(2)
+    headers = {'Authorization': f'Bearer {token}'}
+    resp = client.get('/tasks', headers=headers)
+    assert resp.status_code == 401 or resp.status_code == 422
+
+
+def test_register_user_null_username(client):
+    resp = client.post('/register', json={'email': 'a@b.com', 'password': 'password123'})
+    assert resp.status_code == 400
+
+
+def test_register_user_null_email(client):
+    resp = client.post('/register', json={'username': 'foo', 'password': 'password123'})
+    assert resp.status_code == 400
+
+
+def test_create_task_null_title(client, auth_header):
+    resp = client.post('/tasks', json={'description': 'desc'}, headers=auth_header)
+    assert resp.status_code == 400
+
+
+def test_register_user_malformed_json(client):
+    resp = client.post('/register', data='notjson', content_type='application/json')
+    assert resp.status_code == 400 or resp.status_code == 422
+
+
+def test_register_user_non_json_content_type(client):
+    resp = client.post('/register', data='username=foo&password=bar', content_type='application/x-www-form-urlencoded')
+    assert resp.status_code == 400 or resp.status_code == 415
+
+
+def test_register_user_large_payload(client):
+    user_data = {
+        'email': 'large@example.com',
+        'username': 'largeuser',
+        'password': 'p' * 100 
+    }
+    user_data['extra'] = 'x' * 10000
+    resp = client.post('/register', json=user_data)
+    assert resp.status_code in (201, 400)
+
+
+def test_register_user_email_too_long(client):
+    long_email = 'a' * 110 + '@example.com'  # 110 + 11 = 121 chars
+    user_data = {
+        'email': long_email,
+        'username': 'longemailuser',
+        'password': 'password123'
+    }
+    resp = client.post('/register', json=user_data)
+    assert resp.status_code == 400
+    data = resp.get_json()
+    assert 'validation_error' in data
+    error_detail = data['validation_error']['body_params'][0]
+    # Pydantic EmailStr will fail before max_length, so check for email validity error
+    assert 'not a valid email address' in error_detail['msg']
+    assert error_detail['loc'] == ['email']

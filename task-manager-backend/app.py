@@ -4,6 +4,7 @@ import os
 from typing import Tuple, Optional
 from werkzeug.exceptions import HTTPException
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 from models import db
 
@@ -15,7 +16,7 @@ from config import Config, DevelopmentConfig, TestingConfig
 load_dotenv()
 
 def create_app(database_uri_override: Optional[str] = None, testing: bool = False) -> Flask:
-    app = Flask(__name__)
+    app = Flask(__name__, instance_relative_config=True)
     if testing:
         app.config.from_object(TestingConfig)
     elif os.getenv('FLASK_ENV') == 'development':
@@ -24,6 +25,8 @@ def create_app(database_uri_override: Optional[str] = None, testing: bool = Fals
         app.config.from_object(Config)
     if database_uri_override:
         app.config['SQLALCHEMY_DATABASE_URI'] = database_uri_override
+
+    CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 
     jwt = JWTManager(app)
     db.init_app(app)

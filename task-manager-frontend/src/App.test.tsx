@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import App from './App';
@@ -49,7 +49,9 @@ describe('App Component', () => {
       const user = userEvent.setup();
       
       await user.click(screen.getByRole('link', { name: /tasks/i }));
-      expect(screen.getByRole('heading', { name: /task list/i })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /task list/i })).toBeInTheDocument();
+      });
     });
 
     it('navigates to profile page when clicking Profile link', async () => {
@@ -57,7 +59,9 @@ describe('App Component', () => {
       const user = userEvent.setup();
       
       await user.click(screen.getByRole('link', { name: /profile/i }));
-      expect(screen.getByRole('heading', { name: /user profile/i })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /user profile/i })).toBeInTheDocument();
+      });
     });
 
     it('navigates to home page when clicking Home link', async () => {
@@ -65,7 +69,9 @@ describe('App Component', () => {
       const user = userEvent.setup();
       
       await user.click(screen.getByRole('link', { name: /home/i }));
-      expect(screen.getByRole('heading', { name: /home/i })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /home/i })).toBeInTheDocument();
+      });
     });
   });
 }); 

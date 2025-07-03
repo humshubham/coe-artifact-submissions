@@ -14,13 +14,13 @@ function Profile() {
 
 function App() {
   return (
-    <div>
-      <h1>Task Manager</h1>
-      <nav>
-        <ul>
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/tasks">Tasks</Link></li>
-          <li><Link to="/profile">Profile</Link></li>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-4 text-primary">Task Manager</h1>
+      <nav className="mb-4">
+        <ul className="flex flex-col md:flex-row md:space-x-4">
+          <li><Link to="/" className="text-secondary hover:underline">Home</Link></li>
+          <li><Link to="/tasks" className="text-secondary hover:underline">Tasks</Link></li>
+          <li><Link to="/profile" className="text-secondary hover:underline">Profile</Link></li>
         </ul>
       </nav>
       <Routes>

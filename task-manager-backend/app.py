@@ -32,6 +32,10 @@ def create_app(database_uri_override: Optional[str] = None, testing: bool = Fals
     app.register_blueprint(auth_bp)
     app.register_blueprint(tasks_bp)
 
+    @app.errorhandler(400)
+    def bad_request(error: HTTPException) -> Tuple[Response, int]:
+        return jsonify({'validation_error': {'message': error.description}}), 400
+
     @app.errorhandler(404)
     def not_found(error: HTTPException) -> Tuple[Response, int]:
         return jsonify({'message': 'Resource not found'}), 404

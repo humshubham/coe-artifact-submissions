@@ -5,7 +5,11 @@ import Signup from './Signup';
 import { useAuth, isAuthenticated } from './useAuth';
 
 function Home() {
-  return <div><h2>Home</h2></div>;
+  if (isAuthenticated()) {
+    return <Navigate to="/tasks" replace />;
+  } else {
+    return <Navigate to="/login" replace />;
+  }
 }
 
 function Profile() {

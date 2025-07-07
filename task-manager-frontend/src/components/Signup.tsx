@@ -43,7 +43,7 @@ function Signup() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-xl bg-white rounded-[2rem] shadow-2xl p-10">
-        <h2 className="text-3xl font-bold text-center mb-8">Signup</h2>
+        <h2 className="text-2xl font-bold text-center mb-8">Signup</h2>
         {success && (
           <div data-testid="signup-success" className="mb-4 text-green-600 text-center">
             Signup successful
@@ -111,7 +111,7 @@ function Signup() {
               {apiError}
             </div>
           )}
-          <div className="flex justify-end">
+          <div className="flex justify-center">
             <button
               type="submit"
               className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:opacity-90 transition"

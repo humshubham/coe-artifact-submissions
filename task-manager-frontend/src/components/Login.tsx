@@ -46,7 +46,7 @@ function Login() {
   return (
     <div className="flex items-center justify-center min-h-[80vh]">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
-        <h2 className="text-2xl font-semibold mb-6 text-center text-primary">Login</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center text-primary">Login</h2>
         {error && (
           <div data-testid="login-error" className="mb-4 text-red-600 text-center">
             {error}
@@ -65,7 +65,8 @@ function Login() {
             <input
               id="login-username"
               {...register('username')}
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Username"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
           <div>
@@ -76,19 +77,25 @@ function Login() {
               id="login-password"
               type="password"
               {...register('password')}
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Password"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
-          <button
-            type="submit"
-            className="w-full bg-primary text-white py-2 rounded hover:bg-primary-dark transition"
-          >
-            Log In
-          </button>
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:opacity-90 transition"
+            >
+              Log In
+            </button>
+          </div>
         </form>
         <div className="mt-4 text-center text-sm">
           Don't have an account?{' '}
-          <Link to="/signup" className="text-secondary hover:underline">
+          <Link
+            to="/signup"
+            className="font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent hover:underline hover:brightness-125 transition"
+          >
             Sign up
           </Link>
         </div>

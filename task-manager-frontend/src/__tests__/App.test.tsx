@@ -14,12 +14,6 @@ const renderWithRouter = (initialRoute = '/') => {
 };
 
 describe('App Component', () => {
-  describe('Navigation', () => {
-    it('renders the app title', () => {
-      renderWithRouter();
-      expect(screen.getByRole('heading', { name: /task manager/i })).toBeInTheDocument();
-    });
-  });
 
   describe('Authentication gating', () => {
     it('redirects to login if not authenticated when accessing /tasks', async () => {

@@ -231,4 +231,24 @@ describe('TaskTable Component', () => {
       expect(screen.getByTestId('task-title-99')).toHaveTextContent('Task 100');
     });
   });
+
+  describe('Editing State', () => {
+    it('should disable edit and delete buttons for the task being edited', () => {
+      render(
+        <TaskTable
+          {...defaultProps}
+          editingTaskId={2}
+        />
+      );
+      // Task 1 (index 0) should be enabled
+      expect(screen.getByTestId('edit-task-button-0')).not.toBeDisabled();
+      expect(screen.getByTestId('delete-task-button-0')).not.toBeDisabled();
+      // Task 2 (index 1) should be disabled
+      expect(screen.getByTestId('edit-task-button-1')).toBeDisabled();
+      expect(screen.getByTestId('delete-task-button-1')).toBeDisabled();
+      // Task 3 (index 2) should be enabled
+      expect(screen.getByTestId('edit-task-button-2')).not.toBeDisabled();
+      expect(screen.getByTestId('delete-task-button-2')).not.toBeDisabled();
+    });
+  });
 }); 

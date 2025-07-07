@@ -306,6 +306,7 @@ function Tasks() {
                 onDelete={deleteLoading ? () => {} : handleDeleteTask}
                 editLoading={editLoading}
                 deleteLoading={deleteLoading}
+                editingTaskId={editTask ? editTask.id : undefined}
               />
             </div>
           )}

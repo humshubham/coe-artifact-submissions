@@ -1,3 +1,4 @@
+import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './useAuth';
@@ -6,25 +7,26 @@ import { API_URL } from './envconstants';
 function Login() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const { register, handleSubmit, formState: { errors }, reset } = useForm({
+    mode: 'onSubmit',
+    defaultValues: { username: '', password: '' }
+  });
   const [, setAuthed] = useAuth();
   const navigate = useNavigate();
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function onSubmit(data: { username: string; password: string }) {
     setError(null);
     setSuccess(false);
     try {
       const res = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify(data)
       });
       if (res.status === 200) {
-        const data = await res.json();
-        if (data.access_token) {
-          localStorage.setItem('access_token', data.access_token);
+        const dataRes = await res.json();
+        if (dataRes.access_token) {
+          localStorage.setItem('access_token', dataRes.access_token);
           setSuccess(true);
           setAuthed(true);
           navigate('/tasks');
@@ -47,14 +49,14 @@ function Login() {
         <h2 className="text-2xl font-semibold mb-6 text-center text-primary">Login</h2>
         {error && <div data-testid="login-error" className="mb-4 text-red-600 text-center">{error}</div>}
         {success && <div data-testid="login-success" className="mb-4 text-green-600 text-center">Login successful</div>}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label htmlFor="login-username" className="block text-sm font-medium mb-1">Username</label>
-            <input id="login-username" name="username" value={username} onChange={e => setUsername(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
+            <input id="login-username" {...register('username')} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
           </div>
           <div>
             <label htmlFor="login-password" className="block text-sm font-medium mb-1">Password</label>
-            <input id="login-password" name="password" type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
+            <input id="login-password" type="password" {...register('password')} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
           </div>
           <button type="submit" className="w-full bg-primary text-white py-2 rounded hover:bg-primary-dark transition">Log In</button>
         </form>

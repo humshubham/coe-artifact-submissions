@@ -1,4 +1,5 @@
 import React from 'react';
+import { useForm } from 'react-hook-form';
 
 type TaskFiltersProps = {
   title: string;
@@ -28,14 +29,40 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
   onApply,
   onReset
 }) => {
+  const { register, handleSubmit, reset, setValue, watch } = useForm({
+    defaultValues: { title, description, status, sortBy, sortOrder }
+  });
+
+  // Sync props to form state
+  React.useEffect(() => {
+    setValue('title', title);
+    setValue('description', description);
+    setValue('status', status);
+    setValue('sortBy', sortBy);
+    setValue('sortOrder', sortOrder);
+  }, [title, description, status, sortBy, sortOrder, setValue]);
+
+  // Watch each field and call onChange when it changes
+  React.useEffect(() => {
+    const subscription = watch((values, { name }) => {
+      if (name && values[name] !== undefined) {
+        onChange(name, values[name]);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, onChange]);
+
+  const submitHandler = (data: any) => {
+    onApply();
+  };
+
   return (
-    <form className="flex flex-wrap gap-4 items-end mb-4" onSubmit={e => { e.preventDefault(); onApply(); }} data-testid="task-filters-form">
+    <form className="flex flex-wrap gap-4 items-end mb-4" onSubmit={handleSubmit(submitHandler)} data-testid="task-filters-form">
       <div>
         <label className="block text-xs font-medium mb-1">Title</label>
         <input 
           type="text" 
-          value={title} 
-          onChange={e => onChange('title', e.target.value)} 
+          {...register('title')}
           className="border rounded px-2 py-1" 
           data-testid="filter-title-input"
         />
@@ -44,8 +71,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
         <label className="block text-xs font-medium mb-1">Description</label>
         <input 
           type="text" 
-          value={description} 
-          onChange={e => onChange('description', e.target.value)} 
+          {...register('description')}
           className="border rounded px-2 py-1" 
           data-testid="filter-description-input"
         />
@@ -53,8 +79,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
       <div>
         <label className="block text-xs font-medium mb-1">Status</label>
         <select 
-          value={status} 
-          onChange={e => onChange('status', e.target.value)} 
+          {...register('status')}
           className="border rounded px-2 py-1"
           data-testid="filter-status-select"
         >
@@ -66,8 +91,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
       <div>
         <label className="block text-xs font-medium mb-1">Sort By</label>
         <select 
-          value={sortBy} 
-          onChange={e => onChange('sortBy', e.target.value)} 
+          {...register('sortBy')}
           className="border rounded px-2 py-1"
           data-testid="filter-sort-by-select"
         >
@@ -80,8 +104,7 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
       <div>
         <label className="block text-xs font-medium mb-1">Order</label>
         <select 
-          value={sortOrder} 
-          onChange={e => onChange('sortOrder', e.target.value)} 
+          {...register('sortOrder')}
           className="border rounded px-2 py-1"
           data-testid="filter-sort-order-select"
         >

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import TaskFilters from './TaskFilters';
 
 describe('TaskFilters Component', () => {
@@ -105,13 +105,15 @@ describe('TaskFilters Component', () => {
       expect(mockOnChange).toHaveBeenCalledWith('sortOrder', 'asc');
     });
 
-    it('should call onApply when Apply button is clicked', () => {
+    it('should call onApply when Apply button is clicked', async () => {
       render(<TaskFilters {...defaultProps} />);
 
       const applyButton = screen.getByTestId('filter-apply-button');
       fireEvent.click(applyButton);
 
-      expect(mockOnApply).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockOnApply).toHaveBeenCalled();
+      });
     });
 
     it('should call onReset when Reset button is clicked', () => {
@@ -213,15 +215,16 @@ describe('TaskFilters Component', () => {
   });
 
   describe('Form Submission', () => {
-    it('should prevent default form submission', () => {
+    it('should prevent default form submission', async () => {
       render(<TaskFilters {...defaultProps} />);
 
       const form = screen.getByTestId('task-filters-form');
       const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-      
       fireEvent(form, submitEvent);
 
-      expect(mockOnApply).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockOnApply).toHaveBeenCalled();
+      });
     });
   });
 }); 

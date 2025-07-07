@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 
 type TaskFormProps = {
   mode: 'create' | 'edit';
@@ -22,30 +23,32 @@ const statusOptions = [
 ];
 
 const TaskForm: React.FC<TaskFormProps> = ({ mode, initialData, onSubmit, onCancel, loading }) => {
-  const [form, setForm] = useState(defaultTask);
+  const { register, handleSubmit, reset, setValue } = useForm({
+    mode: 'onSubmit',
+    defaultValues: initialData || defaultTask
+  });
+  // Sync initialData with form
   useEffect(() => {
-    if (initialData) setForm(initialData);
-    else setForm(defaultTask);
-  }, [initialData]);
+    if (initialData) {
+      setValue('title', initialData.title);
+      setValue('description', initialData.description);
+      setValue('status', initialData.status);
+    } else {
+      reset(defaultTask);
+    }
+  }, [initialData, reset, setValue]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm(f => ({ ...f, [e.target.name]: e.target.value }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(form);
+  const submitHandler = (data: { title: string; description: string; status: string }) => {
+    onSubmit(data);
   };
 
   return (
-    <form className="bg-gray-100 p-4 rounded mb-4" onSubmit={handleSubmit} data-testid="task-form">
+    <form className="bg-gray-100 p-4 rounded mb-4" onSubmit={handleSubmit(submitHandler)} data-testid="task-form">
       <h3 className="font-semibold mb-2" data-testid="task-form-title">{mode === 'create' ? 'Add Task' : 'Edit Task'}</h3>
       <div className="mb-2">
         <label className="block text-xs font-medium mb-1">Title</label>
         <input 
-          name="title" 
-          value={form.title} 
-          onChange={handleChange} 
+          {...register('title', { required: true })}
           className="border rounded px-2 py-1 w-full" 
           required 
           data-testid="task-title-input"
@@ -54,9 +57,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ mode, initialData, onSubmit, onCanc
       <div className="mb-2">
         <label className="block text-xs font-medium mb-1">Description</label>
         <input 
-          name="description" 
-          value={form.description} 
-          onChange={handleChange} 
+          {...register('description')}
           className="border rounded px-2 py-1 w-full" 
           data-testid="task-description-input"
         />
@@ -64,9 +65,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ mode, initialData, onSubmit, onCanc
       <div className="mb-2">
         <label className="block text-xs font-medium mb-1">Status</label>
         <select 
-          name="status" 
-          value={form.status} 
-          onChange={handleChange} 
+          {...register('status')}
           className="border rounded px-2 py-1 w-full"
           data-testid="task-status-select"
         >

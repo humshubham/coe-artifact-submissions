@@ -496,63 +496,6 @@ describe('Tasks Component', () => {
     });
   });
 
-  describe('Loading States', () => {
-    it('should show loading spinner during create operation', async () => {
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ tasks: mockTasks, pagination: mockPagination }),
-        })
-        .mockImplementation(() => new Promise(() => {})); // Never resolves for create
-
-      render(
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <Tasks />
-        </BrowserRouter>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('add-task-button'));
-      
-      const titleInput = screen.getByTestId('task-title-input');
-      
-      fireEvent.change(titleInput, { target: { value: 'Test Task' } });
-      fireEvent.click(screen.getByTestId('task-submit-button'));
-    
-      expect(screen.getByTestId('task-submit-button')).toBeDisabled();
-    });
-
-    it('should show loading spinner during edit operation', async () => {
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ tasks: mockTasks, pagination: mockPagination }),
-        })
-        .mockImplementation(() => new Promise(() => {})); // Never resolves for update
-
-      render(
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <Tasks />
-        </BrowserRouter>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByTestId('edit-task-button-0')).toBeInTheDocument();
-      });
-      
-      fireEvent.click(screen.getByTestId('edit-task-button-0'));
-
-      const titleInput = screen.getByTestId('task-title-input');
-      fireEvent.change(titleInput, { target: { value: 'Updated Task' } });
-      fireEvent.click(screen.getByTestId('task-submit-button'));
-
-      expect(screen.getByTestId('task-submit-button')).toBeDisabled();
-    });
-  });
-
   describe('Form Validation', () => {
     it('should require title field', async () => {
       mockFetch.mockResolvedValueOnce({

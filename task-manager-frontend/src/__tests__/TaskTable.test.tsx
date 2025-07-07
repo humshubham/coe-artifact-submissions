@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import TaskTable from './TaskTable';
+import TaskTable from '../components/TaskTable';
 
 describe('TaskTable Component', () => {
   const mockTasks = [
@@ -170,7 +170,9 @@ describe('TaskTable Component', () => {
 
   describe('Task Data Display', () => {
     it('should display task data correctly', () => {
-      const singleTask = [{ id: 1, title: 'Test Task', description: 'Test Description', status: 'done' }];
+      const singleTask = [
+        { id: 1, title: 'Test Task', description: 'Test Description', status: 'done' },
+      ];
       render(<TaskTable {...defaultProps} tasks={singleTask} />);
 
       expect(screen.getByTestId('task-title-0')).toHaveTextContent('Test Task');
@@ -197,7 +199,9 @@ describe('TaskTable Component', () => {
 
     it('should handle very long task descriptions', () => {
       const longDescription = 'b'.repeat(2000);
-      const taskWithLongDesc = [{ id: 1, title: 'Test', description: longDescription, status: 'todo' }];
+      const taskWithLongDesc = [
+        { id: 1, title: 'Test', description: longDescription, status: 'todo' },
+      ];
       render(<TaskTable {...defaultProps} tasks={taskWithLongDesc} />);
 
       expect(screen.getByTestId('task-description-0')).toHaveTextContent(longDescription);
@@ -212,7 +216,9 @@ describe('TaskTable Component', () => {
     });
 
     it('should handle single task', () => {
-      const singleTask = [{ id: 1, title: 'Single Task', description: 'Single Description', status: 'todo' }];
+      const singleTask = [
+        { id: 1, title: 'Single Task', description: 'Single Description', status: 'todo' },
+      ];
       render(<TaskTable {...defaultProps} tasks={singleTask} />);
 
       expect(screen.getByTestId('task-title-0')).toHaveTextContent('Single Task');
@@ -223,7 +229,7 @@ describe('TaskTable Component', () => {
         id: i + 1,
         title: `Task ${i + 1}`,
         description: `Description ${i + 1}`,
-        status: 'todo'
+        status: 'todo',
       }));
       render(<TaskTable {...defaultProps} tasks={manyTasks} />);
 
@@ -234,12 +240,7 @@ describe('TaskTable Component', () => {
 
   describe('Editing State', () => {
     it('should disable edit and delete buttons for the task being edited', () => {
-      render(
-        <TaskTable
-          {...defaultProps}
-          editingTaskId={2}
-        />
-      );
+      render(<TaskTable {...defaultProps} editingTaskId={2} />);
       // Task 1 (index 0) should be enabled
       expect(screen.getByTestId('edit-task-button-0')).not.toBeDisabled();
       expect(screen.getByTestId('delete-task-button-0')).not.toBeDisabled();
@@ -251,4 +252,4 @@ describe('TaskTable Component', () => {
       expect(screen.getByTestId('delete-task-button-2')).not.toBeDisabled();
     });
   });
-}); 
+});

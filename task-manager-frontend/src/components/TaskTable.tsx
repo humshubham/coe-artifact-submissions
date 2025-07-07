@@ -17,7 +17,14 @@ type TaskTableProps = {
   editingTaskId?: number | null;
 };
 
-const TaskTable: React.FC<TaskTableProps> = ({ tasks, onEdit, onDelete, editLoading, deleteLoading, editingTaskId }) => {
+const TaskTable: React.FC<TaskTableProps> = ({
+  tasks,
+  onEdit,
+  onDelete,
+  editLoading,
+  deleteLoading,
+  editingTaskId,
+}) => {
   return (
     <table className="w-full border rounded" data-testid="task-table">
       <thead>
@@ -33,9 +40,15 @@ const TaskTable: React.FC<TaskTableProps> = ({ tasks, onEdit, onDelete, editLoad
           const isEditing = editingTaskId === task.id;
           return (
             <tr key={task.id} className="border-t" data-testid={`task-row-${index}`}>
-              <td className="p-2" data-testid={`task-title-${index}`}>{task.title}</td>
-              <td className="p-2" data-testid={`task-description-${index}`}>{task.description}</td>
-              <td className="p-2" data-testid={`task-status-${index}`}>{task.status}</td>
+              <td className="p-2" data-testid={`task-title-${index}`}>
+                {task.title}
+              </td>
+              <td className="p-2" data-testid={`task-description-${index}`}>
+                {task.description}
+              </td>
+              <td className="p-2" data-testid={`task-status-${index}`}>
+                {task.status}
+              </td>
               <td className="p-2 flex gap-2">
                 <button
                   className="bg-blue-500 text-white px-2 py-1 rounded flex items-center gap-1"
@@ -56,7 +69,9 @@ const TaskTable: React.FC<TaskTableProps> = ({ tasks, onEdit, onDelete, editLoad
                   aria-label={`Delete ${task.title}`}
                   data-testid={`delete-task-button-${index}`}
                 >
-                  {deleteLoading ? <FaSpinner className="animate-spin" aria-label="Loading" /> : null}
+                  {deleteLoading ? (
+                    <FaSpinner className="animate-spin" aria-label="Loading" />
+                  ) : null}
                   Delete
                 </button>
               </td>
@@ -68,4 +83,4 @@ const TaskTable: React.FC<TaskTableProps> = ({ tasks, onEdit, onDelete, editLoad
   );
 };
 
-export default TaskTable; 
+export default TaskTable;

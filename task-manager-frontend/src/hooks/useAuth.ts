@@ -12,4 +12,4 @@ export function useAuth() {
     return () => window.removeEventListener('storage', handler);
   }, []);
   return [authed, setAuthed] as const;
-} 
+}

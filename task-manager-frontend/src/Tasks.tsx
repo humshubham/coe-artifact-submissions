@@ -1,14 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import TaskFilters from './TaskFilters';
-import TaskTable from './TaskTable';
-import TaskForm from './TaskForm';
-import Pagination from './Pagination';
-import Toast from './Toast';
+import TaskFilters from './components/TaskFilters';
+import TaskTable from './components/TaskTable';
+import TaskForm from './components/TaskForm';
+import Pagination from './components/Pagination';
+import Toast from './components/Toast';
 import { FaSpinner } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { API_URL } from './envconstants';
+import { API_URL } from './utils/envconstants';
 
-const defaultFilters = {
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+}
+
+interface TaskFiltersState {
+  title: string;
+  description: string;
+  status: string;
+  sortBy: string;
+  sortOrder: string;
+}
+
+const defaultFilters: TaskFiltersState = {
   title: '',
   description: '',
   status: '',
@@ -17,7 +32,7 @@ const defaultFilters = {
 };
 
 function Tasks() {
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pageNo, setPageNo] = useState(1);
@@ -25,14 +40,14 @@ function Tasks() {
   const [hasNext, setHasNext] = useState(false);
   const [hasPrev, setHasPrev] = useState(false);
   // Filters state
-  const [filters, setFilters] = useState({ ...defaultFilters });
-  const [appliedFilters, setAppliedFilters] = useState({ ...defaultFilters });
+  const [filters, setFilters] = useState<TaskFiltersState>({ ...defaultFilters });
+  const [appliedFilters, setAppliedFilters] = useState<TaskFiltersState>({ ...defaultFilters });
   // Create Task state
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   // Edit Task state
-  const [editTask, setEditTask] = useState<any | null>(null);
+  const [editTask, setEditTask] = useState<Task | null>(null);
   const [editLoading, setEditLoading] = useState(false);
   // Delete Task state
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -57,8 +72,8 @@ function Tasks() {
       try {
         const res = await fetch(`${API_URL}/tasks?${params.toString()}`, {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
@@ -69,8 +84,9 @@ function Tasks() {
         setTotalPages(data.pagination.total_pages);
         setHasNext(data.pagination.has_next);
         setHasPrev(data.pagination.has_prev);
-      } catch (err: any) {
-        setError(err.message || 'Unknown error');
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -89,7 +105,7 @@ function Tasks() {
 
   // TaskFilters handlers
   const handleFilterChange = (field: string, value: string) => {
-    setFilters(f => ({ ...f, [field]: value }));
+    setFilters((f: TaskFiltersState) => ({ ...f, [field]: value }));
   };
   const handleApplyFilters = () => {
     setAppliedFilters({ ...filters });
@@ -116,9 +132,9 @@ function Tasks() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
@@ -127,15 +143,16 @@ function Tasks() {
       setToast({ message: 'Task created successfully', type: 'success' });
       setShowCreateForm(false);
       setAppliedFilters({ ...appliedFilters });
-    } catch (err: any) {
-      setToast({ message: err.message || 'Failed to create task', type: 'error' });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create task';
+      setToast({ message: errorMessage, type: 'error' });
     } finally {
       setCreateLoading(false);
     }
   };
 
   // Edit Task handlers
-  const handleEditTask = (task: any) => {
+  const handleEditTask = (task: Task) => {
     if (showCreateForm) return; // Prevent opening edit if creating
     setEditTask(task);
   };
@@ -150,9 +167,9 @@ function Tasks() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
@@ -161,15 +178,16 @@ function Tasks() {
       setToast({ message: 'Task updated successfully', type: 'success' });
       setEditTask(null);
       setAppliedFilters({ ...appliedFilters });
-    } catch (err: any) {
-      setToast({ message: err.message || 'Failed to update task', type: 'error' });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update task';
+      setToast({ message: errorMessage, type: 'error' });
     } finally {
       setEditLoading(false);
     }
   };
 
   // Delete Task handler
-  const handleDeleteTask = async (task: any) => {
+  const handleDeleteTask = async (task: Task) => {
     if (!window.confirm('Are you sure you want to delete this task?')) return;
     setDeleteLoading(true);
     setToast(null);
@@ -178,8 +196,8 @@ function Tasks() {
       const res = await fetch(`${API_URL}/tasks/${task.id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
@@ -187,8 +205,9 @@ function Tasks() {
       }
       setToast({ message: 'Task deleted successfully', type: 'success' });
       setAppliedFilters({ ...appliedFilters });
-    } catch (err: any) {
-      setToast({ message: err.message || 'Failed to delete task', type: 'error' });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete task';
+      setToast({ message: errorMessage, type: 'error' });
     } finally {
       setDeleteLoading(false);
     }
@@ -208,11 +227,19 @@ function Tasks() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-6 px-2 sm:px-4" data-testid="tasks-container">
+    <div
+      className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 py-6 px-2 sm:px-4"
+      data-testid="tasks-container"
+    >
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-2">
           <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg p-6 mb-6 flex-1">
-            <h2 className="text-3xl font-extrabold text-white drop-shadow mb-2 text-center sm:text-left tracking-tight" data-testid="tasks-title">Tasks</h2>
+            <h2
+              className="text-3xl font-extrabold text-white drop-shadow mb-2 text-center sm:text-left tracking-tight"
+              data-testid="tasks-title"
+            >
+              Tasks
+            </h2>
           </div>
           <button
             className="ml-4 bg-gradient-to-r from-pink-500 to-red-500 text-white px-4 py-2 rounded-lg shadow hover:opacity-90 focus:ring-2 focus:ring-red-300 transition font-semibold text-lg"
@@ -227,8 +254,8 @@ function Tasks() {
           <button
             className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-6 py-2 rounded-lg shadow hover:opacity-90 focus:ring-2 focus:ring-green-300 transition w-full sm:w-auto font-semibold text-lg"
             onClick={handleShowCreate}
-            disabled={showCreateForm || editTask || createLoading}
-            aria-disabled={showCreateForm || editTask || createLoading}
+            disabled={showCreateForm || !!editTask || createLoading}
+            aria-disabled={showCreateForm || !!editTask || createLoading}
             aria-label="Add Task"
             data-testid="add-task-button"
           >
@@ -277,7 +304,9 @@ function Tasks() {
         )}
         <div className="my-4 w-full overflow-x-auto">
           <div className="flex items-center justify-end mb-2 gap-2">
-            <label htmlFor="page-size" className="font-medium text-gray-700">Page Size:</label>
+            <label htmlFor="page-size" className="font-medium text-gray-700">
+              Page Size:
+            </label>
             <select
               id="page-size"
               value={pageSize}
@@ -286,17 +315,33 @@ function Tasks() {
               style={{ minWidth: 80 }}
               data-testid="page-size-select"
             >
-              {[5, 10, 20, 50, 100].map(size => (
-                <option key={size} value={size}>{size}</option>
+              {[5, 10, 20, 50, 100].map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
               ))}
             </select>
           </div>
           {loading ? (
-            <div className="flex items-center gap-2 justify-center sm:justify-start text-blue-700 font-semibold" data-testid="loading-indicator"><FaSpinner className="animate-spin" aria-label="Loading" /> Loading tasks...</div>
+            <div
+              className="flex items-center gap-2 justify-center sm:justify-start text-blue-700 font-semibold"
+              data-testid="loading-indicator"
+            >
+              <FaSpinner className="animate-spin" aria-label="Loading" /> Loading tasks...
+            </div>
           ) : error ? (
-            <div className="text-red-600 bg-white rounded shadow p-4" role="alert" data-testid="error-message">{error}</div>
+            <div
+              className="text-red-600 bg-white rounded shadow p-4"
+              role="alert"
+              data-testid="error-message"
+            >
+              {error}
+            </div>
           ) : (
-            <div className="min-w-[600px] bg-white rounded-xl shadow-lg" data-testid="task-table-container">
+            <div
+              className="min-w-[600px] bg-white rounded-xl shadow-lg"
+              data-testid="task-table-container"
+            >
               <TaskTable
                 tasks={tasks}
                 onEdit={editTask || showCreateForm ? () => {} : handleEditTask}
@@ -308,7 +353,10 @@ function Tasks() {
             </div>
           )}
         </div>
-        <div className="w-full flex flex-col items-center sm:flex-row sm:justify-between" data-testid="pagination-container">
+        <div
+          className="w-full flex flex-col items-center sm:flex-row sm:justify-between"
+          data-testid="pagination-container"
+        >
           <Pagination
             pageNo={pageNo}
             totalPages={totalPages}
@@ -323,4 +371,4 @@ function Tasks() {
   );
 }
 
-export default Tasks; 
+export default Tasks;

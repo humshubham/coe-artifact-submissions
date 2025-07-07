@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import TaskFilters from './TaskFilters';
+import TaskFilters from '../components/TaskFilters';
 
 describe('TaskFilters Component', () => {
   const mockOnChange = jest.fn();
@@ -185,10 +185,15 @@ describe('TaskFilters Component', () => {
       const descriptionInput = screen.getByTestId('filter-description-input');
 
       fireEvent.change(titleInput, { target: { value: 'Title with @#$%^&*()' } });
-      fireEvent.change(descriptionInput, { target: { value: 'Description with <script>alert("xss")</script>' } });
+      fireEvent.change(descriptionInput, {
+        target: { value: 'Description with <script>alert("xss")</script>' },
+      });
 
       expect(mockOnChange).toHaveBeenCalledWith('title', 'Title with @#$%^&*()');
-      expect(mockOnChange).toHaveBeenCalledWith('description', 'Description with <script>alert("xss")</script>');
+      expect(mockOnChange).toHaveBeenCalledWith(
+        'description',
+        'Description with <script>alert("xss")</script>',
+      );
     });
 
     it('should handle unicode characters in text inputs', () => {
@@ -227,4 +232,4 @@ describe('TaskFilters Component', () => {
       });
     });
   });
-}); 
+});

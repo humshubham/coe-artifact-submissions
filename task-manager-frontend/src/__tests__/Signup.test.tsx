@@ -1,13 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Signup from './Signup';
+import Signup from '../components/Signup';
 
 describe('Signup Component', () => {
   it('renders signup page', () => {
     render(
       <MemoryRouter>
         <Signup />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.getByRole('heading', { name: /signup/i })).toBeInTheDocument();
   });
@@ -16,7 +16,7 @@ describe('Signup Component', () => {
     render(
       <MemoryRouter>
         <Signup />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
@@ -27,13 +27,13 @@ describe('Signup Component', () => {
   it('shows a success message after successful signup', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({})
+      json: async () => ({}),
     }) as jest.Mock;
 
     render(
       <MemoryRouter>
         <Signup />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     const usernameInput = screen.getByLabelText(/username/i);
@@ -53,7 +53,7 @@ describe('Signup Component', () => {
     render(
       <MemoryRouter>
         <Signup />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     const signupButton = screen.getByRole('button', { name: /sign up/i });
     fireEvent.click(signupButton);
@@ -66,7 +66,7 @@ describe('Signup Component', () => {
     render(
       <MemoryRouter>
         <Signup />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     const usernameInput = screen.getByLabelText(/username/i);
     const emailInput = screen.getByLabelText(/email/i);
@@ -76,6 +76,8 @@ describe('Signup Component', () => {
     fireEvent.change(emailInput, { target: { value: 'newuser@example.com' } });
     fireEvent.change(passwordInput, { target: { value: 'short' } });
     fireEvent.click(signupButton);
-    expect(await screen.findByTestId('signup-error-password')).toHaveTextContent(/password must be at least 8 characters/i);
+    expect(await screen.findByTestId('signup-error-password')).toHaveTextContent(
+      /password must be at least 8 characters/i,
+    );
   });
-}); 
+});

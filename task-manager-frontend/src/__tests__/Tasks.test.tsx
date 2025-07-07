@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import Tasks from './Tasks';
+import Tasks from '../Tasks';
 
 // Mock fetch
 const mockFetch = jest.fn();
@@ -56,13 +56,13 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
         expect(screen.getByTestId('tasks-title')).toBeInTheDocument();
       });
-      
+
       expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
       expect(screen.getByTestId('logout-button')).toBeInTheDocument();
     });
@@ -73,7 +73,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       expect(screen.getByTestId('loading-indicator')).toBeInTheDocument();
@@ -88,7 +88,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -105,7 +105,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -124,7 +124,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -151,13 +151,19 @@ describe('Tasks Component', () => {
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ tasks: [...mockTasks, { id: 3, title: 'New Task', description: 'New Description', status: 'todo' }], pagination: mockPagination }),
+          json: async () => ({
+            tasks: [
+              ...mockTasks,
+              { id: 3, title: 'New Task', description: 'New Description', status: 'todo' },
+            ],
+            pagination: mockPagination,
+          }),
         });
 
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -187,14 +193,14 @@ describe('Tasks Component', () => {
             method: 'POST',
             headers: expect.objectContaining({
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer mock-token',
+              Authorization: 'Bearer mock-token',
             }),
             body: JSON.stringify({
               title: 'New Task',
               description: 'New Description',
               status: 'todo',
             }),
-          })
+          }),
         );
       });
     });
@@ -210,7 +216,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -224,7 +230,7 @@ describe('Tasks Component', () => {
       });
 
       const titleInput = screen.getByTestId('task-title-input');
-      
+
       fireEvent.change(titleInput, { target: { value: 'New Task' } });
 
       fireEvent.click(screen.getByTestId('task-submit-button'));
@@ -245,7 +251,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -278,7 +284,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -292,7 +298,7 @@ describe('Tasks Component', () => {
       });
 
       const titleInput = screen.getByTestId('task-title-input');
-      
+
       fireEvent.change(titleInput, { target: { value: 'Updated Task' } });
 
       fireEvent.click(screen.getByTestId('task-submit-button'));
@@ -304,7 +310,7 @@ describe('Tasks Component', () => {
             method: 'PUT',
             headers: expect.objectContaining({
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer mock-token',
+              Authorization: 'Bearer mock-token',
             }),
             body: JSON.stringify({
               id: 1,
@@ -312,7 +318,7 @@ describe('Tasks Component', () => {
               description: 'Description 1',
               status: 'todo',
             }),
-          })
+          }),
         );
       });
     });
@@ -334,7 +340,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -351,9 +357,9 @@ describe('Tasks Component', () => {
           expect.objectContaining({
             method: 'DELETE',
             headers: expect.objectContaining({
-              'Authorization': 'Bearer mock-token',
+              Authorization: 'Bearer mock-token',
             }),
-          })
+          }),
         );
       });
     });
@@ -368,7 +374,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -380,7 +386,7 @@ describe('Tasks Component', () => {
       expect(mockConfirm).toHaveBeenCalled();
       expect(mockFetch).not.toHaveBeenCalledWith(
         expect.stringContaining('/tasks/1'),
-        expect.any(Object)
+        expect.any(Object),
       );
     });
   });
@@ -395,7 +401,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -403,7 +409,7 @@ describe('Tasks Component', () => {
       });
 
       const titleInput = screen.getByTestId('filter-title-input');
-      
+
       fireEvent.change(titleInput, { target: { value: 'Test' } });
 
       fireEvent.click(screen.getByTestId('filter-apply-button'));
@@ -411,7 +417,7 @@ describe('Tasks Component', () => {
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
           expect.stringContaining('title=Test'),
-          expect.any(Object)
+          expect.any(Object),
         );
       });
     });
@@ -425,7 +431,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -437,7 +443,7 @@ describe('Tasks Component', () => {
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
           expect.stringContaining('page_no=1'),
-          expect.any(Object)
+          expect.any(Object),
         );
       });
     });
@@ -453,7 +459,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -466,7 +472,7 @@ describe('Tasks Component', () => {
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
           expect.stringContaining('limit=20'),
-          expect.any(Object)
+          expect.any(Object),
         );
       });
     });
@@ -482,7 +488,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -506,7 +512,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -530,7 +536,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -550,7 +556,7 @@ describe('Tasks Component', () => {
       render(
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Tasks />
-        </BrowserRouter>
+        </BrowserRouter>,
       );
 
       await waitFor(() => {
@@ -560,4 +566,4 @@ describe('Tasks Component', () => {
       expect(screen.getByTestId('add-task-button')).toHaveAttribute('aria-disabled', 'false');
     });
   });
-}); 
+});

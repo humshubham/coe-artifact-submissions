@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import Pagination from './Pagination';
+import Pagination from '../components/Pagination';
 
 describe('Pagination Component', () => {
   const mockOnPageChange = jest.fn();
@@ -115,7 +115,9 @@ describe('Pagination Component', () => {
     });
 
     it('should handle last page', () => {
-      render(<Pagination {...defaultProps} pageNo={5} totalPages={5} hasPrev={true} hasNext={false} />);
+      render(
+        <Pagination {...defaultProps} pageNo={5} totalPages={5} hasPrev={true} hasNext={false} />,
+      );
 
       expect(screen.getByTestId('prev-page-button')).not.toBeDisabled();
       expect(screen.getByTestId('next-page-button')).toBeDisabled();
@@ -130,7 +132,15 @@ describe('Pagination Component', () => {
     });
 
     it('should handle very large page numbers', () => {
-      render(<Pagination {...defaultProps} pageNo={999999} totalPages={1000000} hasPrev={true} hasNext={true} />);
+      render(
+        <Pagination
+          {...defaultProps}
+          pageNo={999999}
+          totalPages={1000000}
+          hasPrev={true}
+          hasNext={true}
+        />,
+      );
 
       expect(screen.getByTestId('page-info')).toHaveTextContent('Page 999999 of 1000000');
     });
@@ -215,7 +225,9 @@ describe('Pagination Component', () => {
     });
 
     it('should handle last page with next disabled', () => {
-      render(<Pagination {...defaultProps} pageNo={5} totalPages={5} hasPrev={true} hasNext={false} />);
+      render(
+        <Pagination {...defaultProps} pageNo={5} totalPages={5} hasPrev={true} hasNext={false} />,
+      );
 
       expect(screen.getByTestId('prev-page-button')).not.toBeDisabled();
       expect(screen.getByTestId('next-page-button')).toBeDisabled();
@@ -228,4 +240,4 @@ describe('Pagination Component', () => {
       expect(screen.getByTestId('next-page-button')).not.toBeDisabled();
     });
   });
-}); 
+});

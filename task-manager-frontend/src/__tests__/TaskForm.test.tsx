@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import TaskForm from './TaskForm';
+import TaskForm from '../components/TaskForm';
 
 describe('TaskForm Component', () => {
   const mockOnSubmit = jest.fn();
@@ -11,13 +11,7 @@ describe('TaskForm Component', () => {
 
   describe('Create Mode', () => {
     it('should render create form with empty fields', () => {
-      render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-        />
-      );
+      render(<TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       expect(screen.getByTestId('task-form')).toBeInTheDocument();
       expect(screen.getByTestId('task-form-title')).toHaveTextContent('Add Task');
@@ -27,13 +21,7 @@ describe('TaskForm Component', () => {
     });
 
     it('should handle form submission with valid data', async () => {
-      render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-        />
-      );
+      render(<TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const titleInput = screen.getByTestId('task-title-input');
       const descriptionInput = screen.getByTestId('task-description-input');
@@ -56,13 +44,7 @@ describe('TaskForm Component', () => {
     });
 
     it('should handle cancel button click', () => {
-      render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-        />
-      );
+      render(<TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const cancelButton = screen.getByTestId('task-cancel-button');
       fireEvent.click(cancelButton);
@@ -72,12 +54,7 @@ describe('TaskForm Component', () => {
 
     it('should disable submit button when loading', () => {
       render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-          loading={true}
-        />
+        <TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} loading={true} />,
       );
 
       const submitButton = screen.getByTestId('task-submit-button');
@@ -86,12 +63,7 @@ describe('TaskForm Component', () => {
 
     it('should disable cancel button when loading', () => {
       render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-          loading={true}
-        />
+        <TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} loading={true} />,
       );
 
       const cancelButton = screen.getByTestId('task-cancel-button');
@@ -114,7 +86,7 @@ describe('TaskForm Component', () => {
           initialData={mockInitialData}
           onSubmit={mockOnSubmit}
           onCancel={mockOnCancel}
-        />
+        />,
       );
 
       expect(screen.getByTestId('task-form-title')).toHaveTextContent('Edit Task');
@@ -130,7 +102,7 @@ describe('TaskForm Component', () => {
           initialData={mockInitialData}
           onSubmit={mockOnSubmit}
           onCancel={mockOnCancel}
-        />
+        />,
       );
 
       const titleInput = screen.getByTestId('task-title-input');
@@ -161,7 +133,7 @@ describe('TaskForm Component', () => {
           initialData={mockInitialData}
           onSubmit={mockOnSubmit}
           onCancel={mockOnCancel}
-        />
+        />,
       );
 
       const submitButton = screen.getByTestId('task-submit-button');
@@ -171,26 +143,14 @@ describe('TaskForm Component', () => {
 
   describe('Form Validation', () => {
     it('should require title field', () => {
-      render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-        />
-      );
+      render(<TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const titleInput = screen.getByTestId('task-title-input');
       expect(titleInput).toHaveAttribute('required');
     });
 
     it('should not require description field', () => {
-      render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-        />
-      );
+      render(<TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const descriptionInput = screen.getByTestId('task-description-input');
       expect(descriptionInput).not.toHaveAttribute('required');
@@ -199,13 +159,7 @@ describe('TaskForm Component', () => {
 
   describe('Status Options', () => {
     it('should display all status options', () => {
-      render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-        />
-      );
+      render(<TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const statusSelect = screen.getByTestId('task-status-select');
       const options = statusSelect.querySelectorAll('option');
@@ -222,13 +176,7 @@ describe('TaskForm Component', () => {
 
   describe('Input Handling', () => {
     it('should handle title input changes', () => {
-      render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-        />
-      );
+      render(<TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const titleInput = screen.getByTestId('task-title-input');
       fireEvent.change(titleInput, { target: { value: 'New Title' } });
@@ -237,13 +185,7 @@ describe('TaskForm Component', () => {
     });
 
     it('should handle description input changes', () => {
-      render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-        />
-      );
+      render(<TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const descriptionInput = screen.getByTestId('task-description-input');
       fireEvent.change(descriptionInput, { target: { value: 'New Description' } });
@@ -252,13 +194,7 @@ describe('TaskForm Component', () => {
     });
 
     it('should handle status select changes', () => {
-      render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-        />
-      );
+      render(<TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const statusSelect = screen.getByTestId('task-status-select');
       fireEvent.change(statusSelect, { target: { value: 'done' } });
@@ -269,13 +205,7 @@ describe('TaskForm Component', () => {
 
   describe('Edge Cases', () => {
     it('should handle empty description', async () => {
-      render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-        />
-      );
+      render(<TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
       const titleInput = screen.getByTestId('task-title-input');
       const submitButton = screen.getByTestId('task-submit-button');
@@ -296,12 +226,7 @@ describe('TaskForm Component', () => {
   describe('Loading States', () => {
     it('should show loading state on submit button when loading', () => {
       render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-          loading={true}
-        />
+        <TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} loading={true} />,
       );
 
       const submitButton = screen.getByTestId('task-submit-button');
@@ -310,12 +235,7 @@ describe('TaskForm Component', () => {
 
     it('should show loading state on cancel button when loading', () => {
       render(
-        <TaskForm
-          mode="create"
-          onSubmit={mockOnSubmit}
-          onCancel={mockOnCancel}
-          loading={true}
-        />
+        <TaskForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} loading={true} />,
       );
 
       const cancelButton = screen.getByTestId('task-cancel-button');
@@ -331,7 +251,7 @@ describe('TaskForm Component', () => {
           initialData={{ id: 1, title: 'Task 1', description: 'Desc 1', status: 'todo' }}
           onSubmit={mockOnSubmit}
           onCancel={mockOnCancel}
-        />
+        />,
       );
 
       expect(screen.getByTestId('task-title-input')).toHaveValue('Task 1');
@@ -342,11 +262,11 @@ describe('TaskForm Component', () => {
           initialData={{ id: 2, title: 'Task 2', description: 'Desc 2', status: 'done' }}
           onSubmit={mockOnSubmit}
           onCancel={mockOnCancel}
-        />
+        />,
       );
 
       expect(screen.getByTestId('task-title-input')).toHaveValue('Task 2');
       expect(screen.getByTestId('task-status-select')).toHaveValue('done');
     });
   });
-}); 
+});

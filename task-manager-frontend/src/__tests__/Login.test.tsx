@@ -1,13 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Login from './Login';
+import Login from '../components/Login';
 
 describe('Login Component', () => {
   it('renders login page', () => {
     render(
       <MemoryRouter>
         <Login />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.getByRole('heading', { name: /login/i })).toBeInTheDocument();
   });
@@ -15,13 +15,13 @@ describe('Login Component', () => {
   it('shows an error message for invalid login credentials', async () => {
     global.fetch = jest.fn().mockResolvedValue({
       status: 401,
-      ok: false
+      ok: false,
     }) as jest.Mock;
 
     render(
       <MemoryRouter>
         <Login />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
 
     const usernameInput = screen.getByLabelText(/username/i);
@@ -39,9 +39,9 @@ describe('Login Component', () => {
     render(
       <MemoryRouter initialEntries={['/login']}>
         <Login />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     expect(screen.getByRole('heading', { name: /login/i })).toBeInTheDocument();
     expect(screen.getByText(/sign up/i)).toBeInTheDocument();
   });
-}); 
+});

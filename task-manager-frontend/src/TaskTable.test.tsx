@@ -202,14 +202,6 @@ describe('TaskTable Component', () => {
 
       expect(screen.getByTestId('task-description-0')).toHaveTextContent(longDescription);
     });
-
-    // it('should handle whitespace-only task data', () => {
-    //   const taskWithWhitespace = [{ id: 1, title: '   ', description: '   ', status: 'todo' }];
-    //   render(<TaskTable {...defaultProps} tasks={taskWithWhitespace} />);
-
-    //   expect(screen.getByTestId('task-title-0')).toHaveTextContent('   ');
-    //   expect(screen.getByTestId('task-description-0')).toHaveTextContent('   ');
-    // });
   });
 
   describe('Component Props', () => {

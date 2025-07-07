@@ -202,15 +202,6 @@ describe('TaskFilters Component', () => {
       expect(mockOnChange).toHaveBeenCalledWith('description', 'Déscription with 中文');
     });
 
-    // it('should handle empty string values', () => {
-    //   render(<TaskFilters {...defaultProps} />);
-
-    //   const titleInput = screen.getByTestId('filter-title-input');
-    //   fireEvent.change(titleInput, { target: { value: '' } });
-
-    //   expect(mockOnChange).toHaveBeenCalledWith('title', '');
-    // });
-
     it('should handle whitespace-only values', () => {
       render(<TaskFilters {...defaultProps} />);
 

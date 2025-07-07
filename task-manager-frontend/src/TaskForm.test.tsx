@@ -123,35 +123,36 @@ describe('TaskForm Component', () => {
       expect(screen.getByTestId('task-status-select')).toHaveValue('done');
     });
 
-    // it('should handle form submission with updated data', async () => {
-    //   render(
-    //     <TaskForm
-    //       mode="edit"
-    //       initialData={mockInitialData}
-    //       onSubmit={mockOnSubmit}
-    //       onCancel={mockOnCancel}
-    //     />
-    //   );
+    it('should handle form submission with updated data', async () => {
+      render(
+        <TaskForm
+          mode="edit"
+          initialData={mockInitialData}
+          onSubmit={mockOnSubmit}
+          onCancel={mockOnCancel}
+        />
+      );
 
-    //   const titleInput = screen.getByTestId('task-title-input');
-    //   const descriptionInput = screen.getByTestId('task-description-input');
-    //   const statusSelect = screen.getByTestId('task-status-select');
-    //   const submitButton = screen.getByTestId('task-submit-button');
+      const titleInput = screen.getByTestId('task-title-input');
+      const descriptionInput = screen.getByTestId('task-description-input');
+      const statusSelect = screen.getByTestId('task-status-select');
+      const submitButton = screen.getByTestId('task-submit-button');
 
-    //   fireEvent.change(titleInput, { target: { value: 'Updated Task' } });
-    //   fireEvent.change(descriptionInput, { target: { value: 'Updated Description' } });
-    //   fireEvent.change(statusSelect, { target: { value: 'todo' } });
+      fireEvent.change(titleInput, { target: { value: 'Updated Task' } });
+      fireEvent.change(descriptionInput, { target: { value: 'Updated Description' } });
+      fireEvent.change(statusSelect, { target: { value: 'todo' } });
 
-    //   fireEvent.click(submitButton);
+      fireEvent.click(submitButton);
 
-    //   await waitFor(() => {
-    //     expect(mockOnSubmit).toHaveBeenCalledWith({
-    //       title: 'Updated Task',
-    //       description: 'Updated Description',
-    //       status: 'todo',
-    //     });
-    //   });
-    // });
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledWith({
+          id: 1,
+          title: 'Updated Task',
+          description: 'Updated Description',
+          status: 'todo',
+        });
+      });
+    });
 
     it('should update submit button text in edit mode', () => {
       render(

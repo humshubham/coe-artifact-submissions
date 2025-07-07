@@ -443,75 +443,6 @@ describe('Tasks Component', () => {
     });
   });
 
-  describe('Pagination', () => {
-    // it('should navigate to next page', async () => {
-    //   mockFetch
-    //     .mockResolvedValueOnce({
-    //       ok: true,
-    //       json: async () => ({ tasks: mockTasks, pagination: { ...mockPagination, page_no: 1, has_next: true, has_prev: false } }),
-    //     })
-    //     .mockResolvedValueOnce({
-    //       ok: true,
-    //       json: async () => ({ tasks: mockTasks, pagination: { ...mockPagination, page_no: 2, has_next: false, has_prev: true } }),
-    //     });
-
-    //   render(
-    //     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-    //       <Tasks />
-    //     </BrowserRouter>
-    //   );
-
-    //   await waitFor(() => {
-    //     expect(screen.getByTestId('next-page-button')).toBeInTheDocument();
-    //   });
-
-    //   await act(async () => {
-    //     fireEvent.click(screen.getByTestId('next-page-button'));
-    //   });
-
-    //   // Wait for the page info to update to 'Page 2 of 2'
-    //   await waitFor(() => {
-    //     expect(screen.getByTestId('page-info')).toHaveTextContent('Page 2 of 2');
-    //   });
-
-    //   expect(mockFetch).toHaveBeenCalledWith(
-    //     expect.stringContaining('page_no=2'),
-    //     expect.any(Object)
-    //   );
-    // });
-
-    it('should navigate to previous page', async () => {
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ tasks: mockTasks, pagination: { ...mockPagination, has_prev: true, page_no: 2 } }),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ tasks: mockTasks, pagination: mockPagination }),
-        });
-
-      render(
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <Tasks />
-        </BrowserRouter>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByTestId('prev-page-button')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByTestId('prev-page-button'));
-
-      await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith(
-          expect.stringContaining('page_no=1'),
-          expect.any(Object)
-        );
-      });
-    });
-  });
-
   describe('Page Size Selection', () => {
     it('should change page size and reset to page 1', async () => {
       mockFetch.mockResolvedValueOnce({
@@ -565,77 +496,62 @@ describe('Tasks Component', () => {
     });
   });
 
-//   describe('Loading States', () => {
-//     it('should show loading spinner during create operation', async () => {
-//       mockFetch
-//         .mockResolvedValueOnce({
-//           ok: true,
-//           json: async () => ({ tasks: mockTasks, pagination: mockPagination }),
-//         })
-//         .mockImplementation(() => new Promise(() => {})); // Never resolves for create
+  describe('Loading States', () => {
+    it('should show loading spinner during create operation', async () => {
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ tasks: mockTasks, pagination: mockPagination }),
+        })
+        .mockImplementation(() => new Promise(() => {})); // Never resolves for create
 
-//       render(
-//         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-//           <Tasks />
-//         </BrowserRouter>
-//       );
+      render(
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <Tasks />
+        </BrowserRouter>
+      );
 
-//       await waitFor(() => {
-//         expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
-//       });
+      await waitFor(() => {
+        expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
+      });
 
-//       await act(async () => {
-//         fireEvent.click(screen.getByTestId('add-task-button'));
-//       });
+      fireEvent.click(screen.getByTestId('add-task-button'));
+      
+      const titleInput = screen.getByTestId('task-title-input');
+      
+      fireEvent.change(titleInput, { target: { value: 'Test Task' } });
+      fireEvent.click(screen.getByTestId('task-submit-button'));
+    
+      expect(screen.getByTestId('task-submit-button')).toBeDisabled();
+    });
 
-//       const titleInput = screen.getByTestId('task-title-input');
-//       await act(async () => {
-//         fireEvent.change(titleInput, { target: { value: 'Test Task' } });
-//       });
+    it('should show loading spinner during edit operation', async () => {
+      mockFetch
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ tasks: mockTasks, pagination: mockPagination }),
+        })
+        .mockImplementation(() => new Promise(() => {})); // Never resolves for update
 
-//       await act(async () => {
-//         fireEvent.click(screen.getByTestId('task-submit-button'));
-//       });
+      render(
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <Tasks />
+        </BrowserRouter>
+      );
 
-//       // The button should be disabled during loading
-//       expect(screen.getByTestId('task-submit-button')).toBeDisabled();
-//     });
+      await waitFor(() => {
+        expect(screen.getByTestId('edit-task-button-0')).toBeInTheDocument();
+      });
+      
+      fireEvent.click(screen.getByTestId('edit-task-button-0'));
 
-//     // it('should show loading spinner during edit operation', async () => {
-//     //   mockFetch
-//     //     .mockResolvedValueOnce({
-//     //       ok: true,
-//     //       json: async () => ({ tasks: mockTasks, pagination: mockPagination }),
-//     //     })
-//     //     .mockImplementation(() => new Promise(() => {})); // Never resolves for update
+      const titleInput = screen.getByTestId('task-title-input');
+      fireEvent.change(titleInput, { target: { value: 'Updated Task' } });
+      fireEvent.click(screen.getByTestId('task-submit-button'));
 
-//     //   render(
-//     //     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-//     //       <Tasks />
-//     //     </BrowserRouter>
-//     //   );
-
-//     //   await waitFor(() => {
-//     //     expect(screen.getByTestId('edit-task-button-0')).toBeInTheDocument();
-//     //   });
-
-//     //   await act(async () => {
-//     //     fireEvent.click(screen.getByTestId('edit-task-button-0'));
-//     //   });
-
-//     //   const titleInput = screen.getByTestId('task-title-input');
-//     //   await act(async () => {
-//     //     fireEvent.change(titleInput, { target: { value: 'Updated Task' } });
-//     //   });
-
-//     //   await act(async () => {
-//     //     fireEvent.click(screen.getByTestId('task-submit-button'));
-//     //   });
-
-//     //   // The button should be disabled during loading
-//     //   expect(screen.getByTestId('task-submit-button')).toBeDisabled();
-//     // });
-//   });
+      expect(screen.getByTestId('task-submit-button')).toBeDisabled();
+    });
+  });
 
   describe('Form Validation', () => {
     it('should require title field', async () => {

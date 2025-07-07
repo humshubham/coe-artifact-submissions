@@ -1,12 +1,9 @@
-import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import Tasks from './Tasks';
 
 function Home() {
   return <div><h2>Home</h2></div>;
-}
-
-function Tasks() {
-  return <div><h2>Task List</h2></div>;
 }
 
 function Profile() {
@@ -29,6 +26,7 @@ function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [, setAuthed] = useAuth();
+  const navigate = useNavigate();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,6 +44,7 @@ function Login() {
           localStorage.setItem('access_token', data.access_token);
           setSuccess(true);
           setAuthed(true);
+          navigate('/tasks');
         } else {
           setError('Invalid credentials');
         }
@@ -63,8 +62,8 @@ function Login() {
     <div className="flex items-center justify-center min-h-[80vh]">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
         <h2 className="text-2xl font-semibold mb-6 text-center text-primary">Login</h2>
-        {error && <div className="mb-4 text-red-600 text-center">{error}</div>}
-        {success && <div className="mb-4 text-green-600 text-center">Login successful</div>}
+        {error && <div data-testid="login-error" className="mb-4 text-red-600 text-center">{error}</div>}
+        {success && <div data-testid="login-success" className="mb-4 text-green-600 text-center">Login successful</div>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="login-username" className="block text-sm font-medium mb-1">Username</label>
@@ -128,54 +127,59 @@ function Signup() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[80vh]">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
-        <h2 className="text-2xl font-semibold mb-6 text-center text-primary">Signup</h2>
-        {success ? (
-          <div className="text-green-600 text-center">Signup successful</div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="signup-username" className="block text-sm font-medium mb-1">Username</label>
-              <input
-                id="signup-username"
-                name="username"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              {errors.username && <div data-testid="signup-error-username" className="text-red-600 text-xs mt-1">{errors.username}</div>}
-            </div>
-            <div>
-              <label htmlFor="signup-email" className="block text-sm font-medium mb-1">Email</label>
-              <input
-                id="signup-email"
-                name="email"
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              {errors.email && <div data-testid="signup-error-email" className="text-red-600 text-xs mt-1">{errors.email}</div>}
-            </div>
-            <div>
-              <label htmlFor="signup-password" className="block text-sm font-medium mb-1">Password</label>
-              <input
-                id="signup-password"
-                name="password"
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              {errors.password && <div data-testid="signup-error-password" className="text-red-600 text-xs mt-1">{errors.password}</div>}
-            </div>
-            {apiError && <div data-testid="signup-error-api" className="text-red-600 text-center">{apiError}</div>}
-            <button type="submit" className="w-full bg-primary text-white py-2 rounded hover:bg-primary-dark transition">Sign Up</button>
-          </form>
-        )}
-        <div className="mt-4 text-center text-sm">
-          Already have an account? <Link to="/login" className="text-secondary hover:underline">Log in</Link>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-full max-w-xl bg-white rounded-[2rem] shadow-2xl p-10">
+        <h2 className="text-3xl font-bold text-center mb-8">Signup</h2>
+        {success && <div data-testid="signup-success" className="mb-4 text-green-600 text-center">Signup successful</div>}
+        <form onSubmit={handleSubmit}>
+          <div>
+            <label htmlFor="signup-username" className="block text-sm font-medium mb-1">Username</label>
+            <input
+              id="signup-username"
+              name="username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="Username"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            {errors.username && <div data-testid="signup-error-username" className="text-red-600 text-sm">{errors.username}</div>}
+          </div>
+          <div>
+            <label htmlFor="signup-email" className="block text-sm font-medium mb-1">Email</label>
+            <input
+              id="signup-email"
+              name="email"
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="Email Address"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            {errors.email && <div data-testid="signup-error-email" className="text-red-600 text-sm">{errors.email}</div>}
+          </div>
+          <div>
+            <label htmlFor="signup-password" className="block text-sm font-medium mb-1">Password</label>
+            <input
+              id="signup-password"
+              name="password"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="Password"
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            {errors.password && <div data-testid="signup-error-password" className="text-red-600 text-sm">{errors.password}</div>}
+          </div>
+          {apiError && <div data-testid="signup-error-api" className="text-red-600 text-sm mb-2">{apiError}</div>}
+          <div className="flex justify-end">
+            <button type="submit" className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:opacity-90 transition">
+              Sign Up
+            </button>
+          </div>
+        </form>
+        <div className="mt-6 text-center text-sm text-gray-500">
+          Already have an account?{' '}
+          <Link to="/login" className="text-blue-600 hover:underline font-medium">Log in</Link>
         </div>
       </div>
     </div>
@@ -204,19 +208,9 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-red-400">
-      <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-4 text-primary text-center">Task Manager</h1>
-        <nav className="mb-4 flex flex-col md:flex-row md:space-x-4 justify-center items-center">
-          <ul className="flex flex-col md:flex-row md:space-x-4 items-center">
-            <li><Link to="/" className="text-secondary hover:underline">Home</Link></li>
-            <li><Link to="/tasks" className="text-secondary hover:underline">Tasks</Link></li>
-            <li><Link to="/profile" className="text-secondary hover:underline">Profile</Link></li>
-            {!authed && <li><Link to="/login" className="text-secondary hover:underline">Login</Link></li>}
-            {!authed && <li><Link to="/signup" className="text-secondary hover:underline">Sign Up</Link></li>}
-            {authed && <li><button onClick={handleLogout} className="ml-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">Logout</button></li>}
-          </ul>
-        </nav>
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-red-400 flex flex-col items-center justify-center">
+      <h1 className="text-3xl font-bold mb-8 text-white drop-shadow-lg text-center">Task Manager</h1>
+      <div className="w-full flex-1 flex flex-col items-center justify-center">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/tasks" element={<RequireAuth><Tasks /></RequireAuth>} />

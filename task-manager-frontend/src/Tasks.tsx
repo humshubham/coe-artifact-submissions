@@ -6,6 +6,7 @@ import Pagination from './Pagination';
 import Toast from './Toast';
 import { FaSpinner } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from './envconstants';
 
 const defaultFilters = {
   title: '',
@@ -54,7 +55,7 @@ function Tasks() {
       if (appliedFilters.sortBy) params.append('sort_by', appliedFilters.sortBy);
       if (appliedFilters.sortOrder) params.append('sort_order', appliedFilters.sortOrder);
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks?${params.toString()}`, {
+        const res = await fetch(`${API_URL}/tasks?${params.toString()}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -111,7 +112,7 @@ function Tasks() {
     setToast(null);
     const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks`, {
+      const res = await fetch(`${API_URL}/tasks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +146,7 @@ function Tasks() {
     setToast(null);
     const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${editTask.id}`, {
+      const res = await fetch(`${API_URL}/tasks/${editTask.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +175,7 @@ function Tasks() {
     setToast(null);
     const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${task.id}`, {
+      const res = await fetch(`${API_URL}/tasks/${task.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

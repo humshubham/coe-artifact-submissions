@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { API_URL } from './envconstants';
 
 function Signup() {
   const [success, setSuccess] = useState(false);
@@ -25,7 +26,7 @@ function Signup() {
     setApiError(null);
     if (Object.keys(newErrors).length === 0) {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/register`, {
+        const res = await fetch(`${API_URL}/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, email, password })

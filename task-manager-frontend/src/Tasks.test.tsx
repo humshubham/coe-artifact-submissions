@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import Tasks from './Tasks';
 
@@ -131,11 +131,11 @@ describe('Tasks Component', () => {
         expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('add-task-button'));
-      });
+      fireEvent.click(screen.getByTestId('add-task-button'));
 
-      expect(screen.getByTestId('create-task-form-container')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('create-task-form-container')).toBeInTheDocument();
+      });
       expect(screen.getByTestId('task-form')).toBeInTheDocument();
     });
 
@@ -164,23 +164,21 @@ describe('Tasks Component', () => {
         expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('add-task-button'));
+      fireEvent.click(screen.getByTestId('add-task-button'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('create-task-form-container')).toBeInTheDocument();
       });
 
       const titleInput = screen.getByTestId('task-title-input');
       const descriptionInput = screen.getByTestId('task-description-input');
       const statusSelect = screen.getByTestId('task-status-select');
 
-      await act(async () => {
-        fireEvent.change(titleInput, { target: { value: 'New Task' } });
-        fireEvent.change(descriptionInput, { target: { value: 'New Description' } });
-        fireEvent.change(statusSelect, { target: { value: 'todo' } });
-      });
+      fireEvent.change(titleInput, { target: { value: 'New Task' } });
+      fireEvent.change(descriptionInput, { target: { value: 'New Description' } });
+      fireEvent.change(statusSelect, { target: { value: 'todo' } });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('task-submit-button'));
-      });
+      fireEvent.click(screen.getByTestId('task-submit-button'));
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -219,19 +217,17 @@ describe('Tasks Component', () => {
         expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('add-task-button'));
+      fireEvent.click(screen.getByTestId('add-task-button'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('create-task-form-container')).toBeInTheDocument();
       });
 
       const titleInput = screen.getByTestId('task-title-input');
       
-      await act(async () => {
-        fireEvent.change(titleInput, { target: { value: 'New Task' } });
-      });
+      fireEvent.change(titleInput, { target: { value: 'New Task' } });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('task-submit-button'));
-      });
+      fireEvent.click(screen.getByTestId('task-submit-button'));
 
       await waitFor(() => {
         expect(screen.getByText('Creation failed')).toBeInTheDocument();
@@ -256,11 +252,11 @@ describe('Tasks Component', () => {
         expect(screen.getByTestId('edit-task-button-0')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('edit-task-button-0'));
-      });
+      fireEvent.click(screen.getByTestId('edit-task-button-0'));
 
-      expect(screen.getByTestId('edit-task-form-container')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('edit-task-form-container')).toBeInTheDocument();
+      });
       expect(screen.getByTestId('task-form')).toBeInTheDocument();
     });
 
@@ -289,19 +285,17 @@ describe('Tasks Component', () => {
         expect(screen.getByTestId('edit-task-button-0')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('edit-task-button-0'));
+      fireEvent.click(screen.getByTestId('edit-task-button-0'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('edit-task-form-container')).toBeInTheDocument();
       });
 
       const titleInput = screen.getByTestId('task-title-input');
       
-      await act(async () => {
-        fireEvent.change(titleInput, { target: { value: 'Updated Task' } });
-      });
+      fireEvent.change(titleInput, { target: { value: 'Updated Task' } });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('task-submit-button'));
-      });
+      fireEvent.click(screen.getByTestId('task-submit-button'));
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -347,9 +341,7 @@ describe('Tasks Component', () => {
         expect(screen.getByTestId('delete-task-button-0')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('delete-task-button-0'));
-      });
+      fireEvent.click(screen.getByTestId('delete-task-button-0'));
 
       expect(mockConfirm).toHaveBeenCalledWith('Are you sure you want to delete this task?');
 
@@ -383,9 +375,7 @@ describe('Tasks Component', () => {
         expect(screen.getByTestId('delete-task-button-0')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('delete-task-button-0'));
-      });
+      fireEvent.click(screen.getByTestId('delete-task-button-0'));
 
       expect(mockConfirm).toHaveBeenCalled();
       expect(mockFetch).not.toHaveBeenCalledWith(
@@ -414,13 +404,9 @@ describe('Tasks Component', () => {
 
       const titleInput = screen.getByTestId('filter-title-input');
       
-      await act(async () => {
-        fireEvent.change(titleInput, { target: { value: 'Test' } });
-      });
+      fireEvent.change(titleInput, { target: { value: 'Test' } });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('filter-apply-button'));
-      });
+      fireEvent.click(screen.getByTestId('filter-apply-button'));
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -446,9 +432,7 @@ describe('Tasks Component', () => {
         expect(screen.getByTestId('filter-reset-button')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('filter-reset-button'));
-      });
+      fireEvent.click(screen.getByTestId('filter-reset-button'));
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -517,9 +501,7 @@ describe('Tasks Component', () => {
         expect(screen.getByTestId('prev-page-button')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('prev-page-button'));
-      });
+      fireEvent.click(screen.getByTestId('prev-page-button'));
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -548,9 +530,7 @@ describe('Tasks Component', () => {
       });
 
       const pageSizeSelect = screen.getByTestId('page-size-select');
-      await act(async () => {
-        fireEvent.change(pageSizeSelect, { target: { value: '20' } });
-      });
+      fireEvent.change(pageSizeSelect, { target: { value: '20' } });
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -578,9 +558,7 @@ describe('Tasks Component', () => {
         expect(screen.getByTestId('logout-button')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('logout-button'));
-      });
+      fireEvent.click(screen.getByTestId('logout-button'));
 
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('access_token');
       expect(mockNavigate).toHaveBeenCalledWith('/login');
@@ -676,9 +654,7 @@ describe('Tasks Component', () => {
         expect(screen.getByTestId('add-task-button')).toBeInTheDocument();
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('add-task-button'));
-      });
+      fireEvent.click(screen.getByTestId('add-task-button'));
 
       const titleInput = screen.getByTestId('task-title-input');
       expect(titleInput).toHaveAttribute('required');

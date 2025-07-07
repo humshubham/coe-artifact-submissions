@@ -25,7 +25,7 @@ function Signup() {
     setApiError(null);
     if (Object.keys(newErrors).length === 0) {
       try {
-        const res = await fetch('http://127.0.0.1:5000/register', {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, email, password })

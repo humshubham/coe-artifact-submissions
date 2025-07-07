@@ -7,8 +7,6 @@ import Toast from './Toast';
 import { FaSpinner } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-const PAGE_SIZE = 10;
-
 const defaultFilters = {
   title: '',
   description: '',
@@ -23,7 +21,6 @@ function Tasks() {
   const [error, setError] = useState<string | null>(null);
   const [pageNo, setPageNo] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [hasPrev, setHasPrev] = useState(false);
   // Filters state
@@ -57,7 +54,7 @@ function Tasks() {
       if (appliedFilters.sortBy) params.append('sort_by', appliedFilters.sortBy);
       if (appliedFilters.sortOrder) params.append('sort_order', appliedFilters.sortOrder);
       try {
-        const res = await fetch(`http://127.0.0.1:5000/tasks?${params.toString()}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks?${params.toString()}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -69,7 +66,6 @@ function Tasks() {
         const data = await res.json();
         setTasks(data.tasks);
         setTotalPages(data.pagination.total_pages);
-        setTotal(data.pagination.total);
         setHasNext(data.pagination.has_next);
         setHasPrev(data.pagination.has_prev);
       } catch (err: any) {
@@ -115,7 +111,7 @@ function Tasks() {
     setToast(null);
     const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch('http://127.0.0.1:5000/tasks', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -149,7 +145,7 @@ function Tasks() {
     setToast(null);
     const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(`http://127.0.0.1:5000/tasks/${editTask.id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${editTask.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -178,7 +174,7 @@ function Tasks() {
     setToast(null);
     const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(`http://127.0.0.1:5000/tasks/${task.id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/tasks/${task.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

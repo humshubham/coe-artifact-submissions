@@ -7,6 +7,7 @@ import Toast from './components/Toast';
 import { FaSpinner } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from './utils/envconstants';
+import { apiFetch } from './utils/apiFetch';
 
 interface Task {
   id: number;
@@ -70,7 +71,7 @@ function Tasks() {
       if (appliedFilters.sortBy) params.append('sort_by', appliedFilters.sortBy);
       if (appliedFilters.sortOrder) params.append('sort_order', appliedFilters.sortOrder);
       try {
-        const res = await fetch(`${API_URL}/tasks?${params.toString()}`, {
+        const res = await apiFetch(`${API_URL}/tasks?${params.toString()}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -128,7 +129,7 @@ function Tasks() {
     setToast(null);
     const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(`${API_URL}/tasks`, {
+      const res = await apiFetch(`${API_URL}/tasks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,7 +164,7 @@ function Tasks() {
     setToast(null);
     const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(`${API_URL}/tasks/${editTask.id}`, {
+      const res = await apiFetch(`${API_URL}/tasks/${editTask.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +194,7 @@ function Tasks() {
     setToast(null);
     const token = localStorage.getItem('access_token');
     try {
-      const res = await fetch(`${API_URL}/tasks/${task.id}`, {
+      const res = await apiFetch(`${API_URL}/tasks/${task.id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -232,36 +233,34 @@ function Tasks() {
       data-testid="tasks-container"
     >
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-2">
-          <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg p-6 mb-6 flex-1">
-            <h2
-              className="text-3xl font-extrabold text-white drop-shadow mb-2 text-center sm:text-left tracking-tight"
-              data-testid="tasks-title"
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 p-4 bg-white/80 rounded-2xl shadow-lg border border-gray-100">
+          <h2
+            className="text-3xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 bg-clip-text text-transparent drop-shadow tracking-tight text-center sm:text-left"
+            data-testid="tasks-title"
+          >
+            Tasks
+          </h2>
+          <div className="flex gap-3 mt-4 sm:mt-0 w-full sm:w-auto justify-center sm:justify-end">
+            <button
+              className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-6 py-2 rounded-lg shadow hover:opacity-90 focus:ring-2 focus:ring-green-300 transition font-semibold text-lg disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={handleShowCreate}
+              disabled={showCreateForm || !!editTask || createLoading}
+              aria-disabled={showCreateForm || !!editTask || createLoading}
+              aria-label="Add Task"
+              data-testid="add-task-button"
             >
-              Tasks
-            </h2>
+              {createLoading ? <FaSpinner className="animate-spin inline-block mr-2" aria-label="Loading" /> : null}
+              Add Task
+            </button>
+            <button
+              className="bg-gradient-to-r from-pink-500 to-red-500 text-white px-6 py-2 rounded-lg shadow hover:opacity-90 focus:ring-2 focus:ring-red-300 transition font-semibold text-lg"
+              onClick={handleLogout}
+              aria-label="Logout"
+              data-testid="logout-button"
+            >
+              Logout
+            </button>
           </div>
-          <button
-            className="ml-4 bg-gradient-to-r from-pink-500 to-red-500 text-white px-4 py-2 rounded-lg shadow hover:opacity-90 focus:ring-2 focus:ring-red-300 transition font-semibold text-lg"
-            onClick={handleLogout}
-            aria-label="Logout"
-            data-testid="logout-button"
-          >
-            Logout
-          </button>
-        </div>
-        <div className="mb-4 flex flex-col sm:flex-row sm:justify-end gap-2">
-          <button
-            className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-6 py-2 rounded-lg shadow hover:opacity-90 focus:ring-2 focus:ring-green-300 transition w-full sm:w-auto font-semibold text-lg"
-            onClick={handleShowCreate}
-            disabled={showCreateForm || !!editTask || createLoading}
-            aria-disabled={showCreateForm || !!editTask || createLoading}
-            aria-label="Add Task"
-            data-testid="add-task-button"
-          >
-            {createLoading ? <FaSpinner className="animate-spin" aria-label="Loading" /> : null}
-            Add Task
-          </button>
         </div>
         <div className="w-full overflow-x-auto mb-4">
           <div className="bg-white rounded-xl shadow p-4">

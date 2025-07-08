@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../utils/envconstants';
+import { apiFetch } from '../utils/apiFetch';
 
 function Signup() {
   const [success, setSuccess] = useState(false);
@@ -23,7 +24,7 @@ function Signup() {
   async function onSubmit(data: { username: string; email: string; password: string }) {
     setApiError(null);
     try {
-      const res = await fetch(`${API_URL}/register`, {
+      const res = await apiFetch(`${API_URL}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

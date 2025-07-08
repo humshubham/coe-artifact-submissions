@@ -58,33 +58,33 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
 
   return (
     <form
-      className="flex flex-wrap gap-4 items-end mb-4"
+      className="w-full flex flex-wrap gap-4 items-end justify-between bg-white/80 p-4 rounded-2xl shadow border border-gray-100"
       onSubmit={handleSubmit(submitHandler)}
       data-testid="task-filters-form"
     >
-      <div>
-        <label className="block text-xs font-medium mb-1">Title</label>
+      <div className="flex flex-col min-w-[120px] flex-1">
+        <label className="block text-sm font-semibold mb-1 text-gray-700">Title</label>
         <input
           type="text"
           {...register('title')}
-          className="border rounded px-2 py-1"
+          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white shadow-sm transition"
           data-testid="filter-title-input"
         />
       </div>
-      <div>
-        <label className="block text-xs font-medium mb-1">Description</label>
+      <div className="flex flex-col min-w-[120px] flex-1">
+        <label className="block text-sm font-semibold mb-1 text-gray-700">Description</label>
         <input
           type="text"
           {...register('description')}
-          className="border rounded px-2 py-1"
+          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white shadow-sm transition"
           data-testid="filter-description-input"
         />
       </div>
-      <div>
-        <label className="block text-xs font-medium mb-1">Status</label>
+      <div className="flex flex-col min-w-[100px]">
+        <label className="block text-sm font-semibold mb-1 text-gray-700">Status</label>
         <select
           {...register('status')}
-          className="border rounded px-2 py-1"
+          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white shadow-sm transition"
           data-testid="filter-status-select"
         >
           {statusOptions.map((opt) => (
@@ -94,11 +94,11 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
           ))}
         </select>
       </div>
-      <div>
-        <label className="block text-xs font-medium mb-1">Sort By</label>
+      <div className="flex flex-col min-w-[100px]">
+        <label className="block text-sm font-semibold mb-1 text-gray-700">Sort By</label>
         <select
           {...register('sortBy')}
-          className="border rounded px-2 py-1"
+          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white shadow-sm transition"
           data-testid="filter-sort-by-select"
         >
           <option value="created_at">Created At</option>
@@ -107,32 +107,34 @@ const TaskFilters: React.FC<TaskFiltersProps> = ({
           <option value="status">Status</option>
         </select>
       </div>
-      <div>
-        <label className="block text-xs font-medium mb-1">Order</label>
+      <div className="flex flex-col min-w-[90px]">
+        <label className="block text-sm font-semibold mb-1 text-gray-700">Order</label>
         <select
           {...register('sortOrder')}
-          className="border rounded px-2 py-1"
+          className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white shadow-sm transition"
           data-testid="filter-sort-order-select"
         >
           <option value="asc">Asc</option>
           <option value="desc">Desc</option>
         </select>
       </div>
-      <button
-        type="submit"
-        className="bg-blue-500 text-white px-3 py-1 rounded"
-        data-testid="filter-apply-button"
-      >
-        Apply
-      </button>
-      <button
-        type="button"
-        className="bg-gray-300 text-black px-3 py-1 rounded ml-2"
-        onClick={onReset}
-        data-testid="filter-reset-button"
-      >
-        Reset
-      </button>
+      <div className="flex flex-row gap-2 mt-4 sm:mt-0">
+        <button
+          type="submit"
+          className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-5 py-2 rounded-lg shadow hover:opacity-90 focus:ring-2 focus:ring-blue-300 font-semibold transition"
+          data-testid="filter-apply-button"
+        >
+          Apply
+        </button>
+        <button
+          type="button"
+          className="bg-gray-200 text-gray-700 px-5 py-2 rounded-lg shadow hover:bg-gray-300 focus:ring-2 focus:ring-gray-300 font-semibold transition"
+          onClick={onReset}
+          data-testid="filter-reset-button"
+        >
+          Reset
+        </button>
+      </div>
     </form>
   );
 };

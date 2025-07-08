@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { API_URL } from '../utils/envconstants';
+import { apiFetch } from '../utils/apiFetch';
 
 function Login() {
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +19,7 @@ function Login() {
     setError(null);
     setSuccess(false);
     try {
-      const res = await fetch(`${API_URL}/login`, {
+      const res = await apiFetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

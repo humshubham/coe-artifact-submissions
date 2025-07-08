@@ -25,7 +25,7 @@ describe('Login Component', () => {
     );
 
     const usernameInput = screen.getByLabelText(/username/i);
-    const passwordInput = screen.getByLabelText(/password/i);
+    const passwordInput = screen.getByLabelText(/^password$/i);
     const loginButton = screen.getByRole('button', { name: /log in/i });
 
     fireEvent.change(usernameInput, { target: { value: 'wronguser' } });
@@ -43,5 +43,20 @@ describe('Login Component', () => {
     );
     expect(screen.getByRole('heading', { name: /login/i })).toBeInTheDocument();
     expect(screen.getByText(/sign up/i)).toBeInTheDocument();
+  });
+
+  it('toggles password visibility when clicking the show/hide button', () => {
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>,
+    );
+    const passwordInput = screen.getByLabelText(/^password$/i);
+    const eyeButton = screen.getByRole('button', { name: /show password|hide password/i });
+    expect(passwordInput).toHaveAttribute('type', 'password');
+    fireEvent.click(eyeButton);
+    expect(passwordInput).toHaveAttribute('type', 'text');
+    fireEvent.click(eyeButton);
+    expect(passwordInput).toHaveAttribute('type', 'password');
   });
 });

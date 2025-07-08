@@ -4,10 +4,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { API_URL } from '../utils/envconstants';
 import { apiFetch } from '../utils/apiFetch';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 function Login() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit } = useForm({
     mode: 'onSubmit',
     defaultValues: { username: '', password: '' },
@@ -74,13 +76,24 @@ function Login() {
             <label htmlFor="login-password" className="block text-sm font-medium mb-1">
               Password
             </label>
-            <input
-              id="login-password"
-              type="password"
-              {...register('password')}
-              placeholder="Password"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+            <div className="relative">
+              <input
+                id="login-password"
+                type={showPassword ? 'text' : 'password'}
+                {...register('password')}
+                placeholder="Password"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12"
+              />
+              <button
+                type="button"
+                tabIndex={-1}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
           <div className="flex justify-center">
             <button

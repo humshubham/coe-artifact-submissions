@@ -3,19 +3,24 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../utils/envconstants';
 import { apiFetch } from '../utils/apiFetch';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 function Signup() {
   const [success, setSuccess] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm({
     mode: 'onSubmit',
-    defaultValues: { username: '', email: '', password: '' },
+    defaultValues: { username: '', email: '', password: '', confirmPassword: '' },
   });
+  const passwordValue = watch('password');
 
   function isValidEmail(email: string) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -91,19 +96,61 @@ function Signup() {
             <label htmlFor="signup-password" className="block text-sm font-medium mb-1">
               Password
             </label>
-            <input
-              id="signup-password"
-              type="password"
-              {...register('password', {
-                required: 'Password is required',
-                minLength: { value: 8, message: 'Password must be at least 8 characters' },
-              })}
-              placeholder="Password"
-              className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+            <div className="relative">
+              <input
+                id="signup-password"
+                type={showPassword ? 'text' : 'password'}
+                {...register('password', {
+                  required: 'Password is required',
+                  minLength: { value: 8, message: 'Password must be at least 8 characters' },
+                })}
+                placeholder="Password"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12"
+              />
+              <button
+                type="button"
+                tabIndex={-1}
+                className="absolute inset-y-0 right-4 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.password && (
               <div data-testid="signup-error-password" className="text-red-600 text-sm">
                 {errors.password.message as string}
+              </div>
+            )}
+          </div>
+          <div>
+            <label htmlFor="signup-confirm-password" className="block text-sm font-medium mb-1">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <input
+                id="signup-confirm-password"
+                type={showConfirmPassword ? 'text' : 'password'}
+                {...register('confirmPassword', {
+                  required: 'Please confirm your password',
+                  validate: value => value === passwordValue || 'Passwords do not match',
+                })}
+                placeholder="Confirm Password"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-4 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12"
+              />
+              <button
+                type="button"
+                tabIndex={-1}
+                className="absolute inset-y-0 right-4 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                onClick={() => setShowConfirmPassword((v) => !v)}
+                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              >
+                {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <div data-testid="signup-error-confirm-password" className="text-red-600 text-sm">
+                {errors.confirmPassword.message as string}
               </div>
             )}
           </div>

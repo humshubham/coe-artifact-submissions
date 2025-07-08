@@ -1,69 +1,131 @@
-# React + TypeScript + Vite
+# Task Manager Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + TypeScript + Vite application for managing tasks, featuring authentication, task filtering, and more. This project is structured for scalability and maintainability, with a focus on modern best practices.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Project Structure
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+task-manager-frontend/
+│
+├── src/
+│   ├── components/         # Reusable UI components
+│   │   ├── Signup.tsx
+│   │   ├── Login.tsx
+│   │   ├── TaskFilters.tsx
+│   │   ├── TaskTable.tsx
+│   │   ├── Toast.tsx
+│   │   ├── TaskForm.tsx
+│   │   └── Pagination.tsx
+│   ├── hooks/              # Custom React hooks
+│   │   └── useAuth.ts
+│   ├── utils/              # Utility functions and constants
+│   │   ├── apiFetch.ts
+│   │   └── envconstants.ts
+│   ├── __tests__/          # Unit and integration tests
+│   │   ├── App.test.tsx
+│   │   ├── Login.test.tsx
+│   │   ├── Signup.test.tsx
+│   │   ├── TaskTable.test.tsx
+│   │   ├── Tasks.test.tsx
+│   │   ├── TaskForm.test.tsx
+│   │   ├── TaskFilters.test.tsx
+│   │   └── Pagination.test.tsx
+│   ├── App.tsx             # Main app component
+│   ├── Tasks.tsx           # Task management page
+│   ├── main.tsx            # App entry point
+│   ├── index.css           # Global styles
+│   ├── setupTests.ts       # Jest setup and mocks
+│   └── vite-env.d.ts       # Vite environment types
+│
+├── public/                 # Static assets (if any)
+├── package.json            # Project metadata and scripts
+├── tsconfig.json           # TypeScript config
+├── vite.config.ts          # Vite config
+├── tailwind.config.js      # Tailwind CSS config
+├── postcss.config.js       # PostCSS config
+├── jest.config.js          # Jest config
+├── .env.example            # Sample environment file
+└── README.md               # Project documentation
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Environment Variables
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+This project uses Vite's environment variable system. Create a `.env` file in the project root with the following variable:
+
 ```
+VITE_API_URL=<your-backend-api-url>
+```
+
+- `VITE_API_URL`: The base URL for the backend API (e.g., `http://localhost:5000`).
+
+> **Note:** Only variables prefixed with `VITE_` are exposed to the frontend.
+
+---
+
+## Development Setup
+
+1. **Install dependencies:**
+   ```sh
+   npm install
+   # or
+   yarn install
+   ```
+
+2. **Set up environment variables:**
+   - Copy `.env.example` to `.env` (create `.env.example` if it doesn't exist) and set `VITE_API_URL`.
+
+3. **Start the development server:**
+   ```sh
+   npm run dev
+   # or
+   yarn dev
+   ```
+   The app will be available at [http://localhost:5173](http://localhost:5173) by default.
+
+4. **Lint the code:**
+   ```sh
+   npm run lint
+   ```
+
+5. **Build for production:**
+   ```sh
+   npm run build
+   ```
+
+---
+
+## Testing
+
+- **Run all tests:**
+  ```sh
+  npm test
+  # or
+  yarn test
+  ```
+
+- **Watch tests:**
+  ```sh
+  npm run test:watch
+  # or
+  yarn test:watch
+  ```
+
+- **Test setup:**
+  - Jest is configured with `jsdom` for DOM testing.
+  - `src/setupTests.ts` mocks environment variables and sets up [@testing-library/jest-dom](https://github.com/testing-library/jest-dom).
+  - Test files are located in `src/__tests__/` and follow the `*.test.tsx` naming convention.
+
+---
+
+## Additional Notes
+
+- Uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+- Uses [React Hook Form](https://react-hook-form.com/) for form management.
+- Uses [React Router](https://reactrouter.com/) for routing.
+- API requests are made using [axios](https://axios-http.com/).
+
+---
